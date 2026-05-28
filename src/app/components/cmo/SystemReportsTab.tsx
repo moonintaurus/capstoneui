@@ -19,9 +19,11 @@ import {
   EVENT_CATEGORIES,
   MOCK_CMO_EVENTS,
   getCategoryColor,
+  getEventFeedbackSummary,
   type ApprovalStatus,
   type CmoEvent,
   type EventType,
+  type FeedbackSummary,
   type Modality,
 } from './data';
 
@@ -99,6 +101,16 @@ export function SystemReportsTab({ events = MOCK_CMO_EVENTS }: SystemReportsTabP
   const generatedCertificates = filtered.reduce((sum, event) => sum + event.generatedCertificates + event.pendingCertificates + event.notEligibleCertificates, 0);
   const releasedCertificates = filtered.reduce((sum, event) => sum + event.releasedCertificates, 0);
   const certificateReleaseRate = generatedCertificates > 0 ? Math.round((releasedCertificates / generatedCertificates) * 100) : 0;
+  const feedbackSummaries = filtered
+    .map(event => getEventFeedbackSummary(event.id))
+    .filter((summary): summary is FeedbackSummary => Boolean(summary));
+  const feedbackResponses = feedbackSummaries.reduce((sum, summary) => sum + summary.totalResponses, 0);
+  const averageFeedbackRating = feedbackSummaries.length > 0
+    ? (feedbackSummaries.reduce((sum, summary) => sum + summary.averageRating, 0) / feedbackSummaries.length).toFixed(1)
+    : '0.0';
+  const averageFeedbackResponseRate = feedbackSummaries.length > 0
+    ? Math.round(feedbackSummaries.reduce((sum, summary) => sum + summary.responseRate, 0) / feedbackSummaries.length)
+    : 0;
 
   const departmentData = Array.from(new Set(filtered.map(event => event.department))).map(department => ({
     dept: department.split(' ').map(word => word[0]).join('').slice(0, 6),
@@ -202,6 +214,9 @@ export function SystemReportsTab({ events = MOCK_CMO_EVENTS }: SystemReportsTabP
         <SummaryCard label="Published Events" value={publishedEvents} helper="Visible to eligible participants" />
         <SummaryCard label="Completed Events" value={completedEvents} helper="Ended events" />
         <SummaryCard label="Certificate Release Rate" value={`${certificateReleaseRate}%`} helper="Released certificates" />
+        <SummaryCard label="Feedback Responses" value={feedbackResponses} helper="Submitted standardized forms" />
+        <SummaryCard label="Avg Feedback Rating" value={`${averageFeedbackRating}/5`} helper="Across completed events" />
+        <SummaryCard label="Avg Feedback Response Rate" value={`${averageFeedbackResponseRate}%`} helper="Feedback forms submitted" />
       </div>
 
       <div className="bg-white rounded-2xl border p-5" style={{ borderColor: C.border }}>

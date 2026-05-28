@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, CheckCircle2, Eye, ChevronRight } from 'lucide-react';
+import { X, Upload, CheckCircle2, Eye, ChevronRight, MessageSquare } from 'lucide-react';
 import { C, EVENT_CATEGORIES } from './data';
 import type { OrgEvent } from './data';
 
@@ -253,12 +253,22 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
                       ['End', endDate || '-'],
                       ['Max Participants', maxParticipants],
                       ['Certificate Template', certValidated ? 'Validated' : 'Not uploaded'],
+                      ['Feedback Form', 'Standardized form auto assigned'],
                     ].map(([k, v]) => (
                       <div key={k} className="flex justify-between items-start px-4 py-3">
                         <span className="text-xs font-semibold flex-shrink-0 w-44" style={{ color: C.muted }}>{k}</span>
                         <span className="text-sm text-right" style={{ color: C.text }}>{v}</span>
                       </div>
                     ))}
+                  </div>
+                  <div className="rounded-xl border p-4 flex gap-3" style={{ borderColor: C.teal + '40', backgroundColor: C.teal + '08' }}>
+                    <MessageSquare className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: C.teal }} />
+                    <div>
+                      <p className="text-xs font-bold mb-1" style={{ color: C.text }}>Standardized feedback form included</p>
+                      <p className="text-xs leading-relaxed" style={{ color: C.sub }}>
+                        Organizers do not upload a feedback form. After the event ends, participants will answer the system's standard rating and open ended questions. The summarized results will be visible to the organizer and CMO per event.
+                      </p>
+                    </div>
                   </div>
                   <div className="rounded-xl border p-4 flex gap-3" style={{ borderColor: C.teal + '40', backgroundColor: C.teal + '08' }}>
                     <p className="text-xs leading-relaxed" style={{ color: C.sub }}>

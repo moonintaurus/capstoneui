@@ -6,6 +6,7 @@ import {
   Clock,
   FileText,
   MapPin,
+  MessageSquare,
   Users,
   X,
 } from 'lucide-react';
@@ -16,10 +17,12 @@ import {
   MOCK_CMO_EVENTS,
   formatDateTime,
   getCategoryColor,
+  getFeedbackStatusForEvent,
   type ApprovalStatus,
   type CmoEvent,
   type Modality,
 } from './data';
+import { FeedbackSummaryTab } from './FeedbackSummaryTab';
 
 const now = new Date('2026-05-28T12:00:00');
 
@@ -227,6 +230,7 @@ function EventRecordModal({ event, onClose }: { event: CmoEvent; onClose: () => 
                     { icon: Users, label: 'Waitlist Availability', value: event.waitlistAvailable ? `${event.waitlistCount} waitlisted` : 'Not available' },
                     { icon: Award, label: 'Certificate Template', value: event.certTemplateStatus },
                     { icon: FileText, label: 'Certificate Release Status', value: `${event.releasedCertificates} released` },
+                    { icon: MessageSquare, label: 'Feedback Status', value: getFeedbackStatusForEvent(event) },
                   ].map(({ icon: Icon, label, value }) => (
                     <div key={label} className="rounded-xl border p-3 flex gap-2.5" style={{ borderColor: C.border, backgroundColor: C.cream }}>
                       <Icon className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: C.maroon }} />
@@ -290,6 +294,10 @@ function EventRecordModal({ event, onClose }: { event: CmoEvent; onClose: () => 
                     </div>
                   ))}
                 </div>
+              </section>
+
+              <section>
+                <FeedbackSummaryTab eventId={event.id} event={event} />
               </section>
 
               <section>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { BarChart2, Eye } from 'lucide-react';
-import { C, MOCK_EVENTS, getCategoryColor, isCompletedEvent } from './data';
+import { BarChart2, Eye, MessageSquare } from 'lucide-react';
+import { C, MOCK_EVENTS, getCategoryColor, isCompletedEvent, getEventFeedbackSummary } from './data';
 import type { OrgEvent } from './data';
 import { OrganizerEventDetail } from './OrganizerEventDetail';
 
@@ -18,24 +18,26 @@ export function ReportsTab() {
   const pastEvents = MOCK_EVENTS.filter(event => isCompletedEvent(event));
 
   if (selectedEvent) {
-    return <OrganizerEventDetail event={selectedEvent} onBack={() => setSelectedEvent(null)} defaultTab="metrics" />;
+    return <OrganizerEventDetail event={selectedEvent} onBack={() => setSelectedEvent(null)} defaultTab="feedback" />;
   }
 
   const totalRegistered = pastEvents.reduce((sum, event) => sum + event.registrationCount, 0);
   const totalWaitlisted = pastEvents.reduce((sum, event) => sum + event.waitlistCount, 0);
   const completedOnlineHybrid = pastEvents.filter(event => event.modality !== 'Onsite').length;
+  const totalFeedbackResponses = pastEvents.reduce((sum, event) => sum + (getEventFeedbackSummary(event.id)?.totalResponses ?? 0), 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-bold text-xl" style={{ color: C.text, fontFamily: '"Trajan Pro 3", Cambria, serif' }}>Event History</h2>
-        <p className="text-sm mt-1" style={{ color: C.muted }}>Click a past event to view its event metrics and management details.</p>
+        <p className="text-sm mt-1" style={{ color: C.muted }}>Click a past event to view its standardized feedback summary, event metrics, and management details.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <HistoryMetric label="Past Events" value={pastEvents.length} color={C.maroon} />
         <HistoryMetric label="Registered Participants" value={totalRegistered} color={C.teal} />
         <HistoryMetric label="Online / Hybrid Completed" value={completedOnlineHybrid} color={C.goldenrod} />
+        <HistoryMetric label="Feedback Responses" value={totalFeedbackResponses} color={C.purple} />
       </div>
 
       <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
@@ -47,7 +49,7 @@ export function ReportsTab() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: C.cream }}>
-                {['Event', 'Category', 'Modality', 'Date', 'Registered', 'Waitlist', 'CSV Status', 'Actions'].map(h => (
+                {['Event', 'Category', 'Modality', 'Date', 'Registered', 'Waitlist', 'CSV Status', 'Feedback', 'Actions'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-bold whitespace-nowrap" style={{ color: C.muted }}>{h}</th>
                 ))}
               </tr>
@@ -55,6 +57,7 @@ export function ReportsTab() {
             <tbody className="divide-y" style={{ borderColor: C.border }}>
               {pastEvents.map(event => {
                 const categoryColor = getCategoryColor(event.category);
+                const feedbackSummary = getEventFeedbackSummary(event.id);
                 return (
                   <tr key={event.id} className="hover:bg-stone-50">
                     <td className="px-4 py-3.5">
@@ -69,6 +72,17 @@ export function ReportsTab() {
                     <td className="px-4 py-3.5 text-xs font-semibold" style={{ color: C.text }}>{event.registrationCount}</td>
                     <td className="px-4 py-3.5 text-xs font-semibold" style={{ color: event.waitlistCount > 0 ? C.tangerine : C.muted }}>{event.waitlistCount}</td>
                     <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.sub }}>{event.csvVerificationStatus}</td>
+                    <td className="px-4 py-3.5">
+                      {feedbackSummary ? (
+                        <div className="flex items-center gap-1.5 whitespace-nowrap">
+                          <MessageSquare className="w-3.5 h-3.5" style={{ color: C.purple }} />
+                          <span className="text-xs font-semibold" style={{ color: C.text }}>{feedbackSummary.averageRating}/5</span>
+                          <span className="text-xs" style={{ color: C.muted }}>({feedbackSummary.totalResponses})</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs whitespace-nowrap" style={{ color: C.muted }}>No responses</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3.5">
                       <button
                         type="button"
@@ -85,14 +99,14 @@ export function ReportsTab() {
               })}
               {pastEvents.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-sm" style={{ color: C.muted }}>No past events yet.</td>
+                  <td colSpan={9} className="px-4 py-10 text-center text-sm" style={{ color: C.muted }}>No past events yet.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
         <div className="px-5 py-3 border-t text-xs" style={{ borderColor: C.border, color: C.muted }}>
-          Past events remain available for metrics review, registrant records, attendance records, certificate status, and CSV verification where applicable.
+          Past events remain available for feedback summaries, metrics review, registrant records, attendance records, certificate status, and CSV verification where applicable.
         </div>
       </div>
     </div>

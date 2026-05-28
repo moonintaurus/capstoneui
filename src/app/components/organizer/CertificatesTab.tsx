@@ -19,7 +19,7 @@ export function CertificatesTab({ eventId, event }: { eventId?: string; event?: 
       (acc, cert) => {
         if (cert.status === 'Generating Certificate' || cert.status === 'Verified Attended' || cert.status === 'Released') acc.generated += 1;
         if (cert.status === 'Released') acc.released += 1;
-        if (cert.status === 'Pending Verification' || cert.status === 'Survey Required') acc.pending += 1;
+        if (cert.status === 'Pending Verification' || cert.status === 'Feedback Required') acc.pending += 1;
         if (cert.status === 'Not Eligible') acc.notEligible += 1;
         return acc;
       },

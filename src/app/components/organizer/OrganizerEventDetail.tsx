@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
-import { ArrowLeft, Users, ListOrdered, ClipboardList, Award, Upload, BarChart2 } from 'lucide-react';
+import { ArrowLeft, Users, ListOrdered, ClipboardList, Award, Upload, BarChart2, MessageSquare } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
-import { C, OrgEvent, MOCK_CERTS, canVerifyCsvForEvent } from './data';
+import { C, OrgEvent, MOCK_CERTS, canVerifyCsvForEvent, getEventFeedbackSummary } from './data';
 import { RegistrantsTab } from './RegistrantsTab';
 import { WaitlistTab } from './WaitlistTab';
 import { AttendanceTab } from './AttendanceTab';
 import { CertificatesTab } from './CertificatesTab';
 import { CsvUploadsTab } from './CsvUploadsTab';
+import { FeedbackSummaryTab } from './FeedbackSummaryTab';
 
-type SectionTab = 'registrants' | 'waitlist' | 'attendance' | 'certificates' | 'metrics' | 'csv-uploads';
+type SectionTab = 'registrants' | 'waitlist' | 'attendance' | 'certificates' | 'metrics' | 'feedback' | 'csv-uploads';
 
 const BASE_SECTION_TABS: { id: SectionTab; label: string; icon: React.ElementType }[] = [
   { id: 'registrants', label: 'Registrants', icon: Users },
@@ -16,6 +17,7 @@ const BASE_SECTION_TABS: { id: SectionTab; label: string; icon: React.ElementTyp
   { id: 'attendance', label: 'Attendance', icon: ClipboardList },
   { id: 'certificates', label: 'Certificates', icon: Award },
   { id: 'metrics', label: 'Event Metrics', icon: BarChart2 },
+  { id: 'feedback', label: 'Feedback Summary', icon: MessageSquare },
 ];
 
 function SummaryCard({ label, value, color }: { label: string; value: string | number; color: string }) {
@@ -30,17 +32,19 @@ function SummaryCard({ label, value, color }: { label: string; value: string | n
 function EventMetrics({ event, certificateCount }: { event: OrgEvent; certificateCount: number }) {
   const attendanceRate = event.registrationCount > 0 ? Math.round(((event.registrationCount - event.waitlistCount) / event.registrationCount) * 100) : 0;
   const waitlistRate = event.registrationCount > 0 ? Math.round((event.waitlistCount / event.registrationCount) * 100) : 0;
+  const feedbackSummary = getEventFeedbackSummary(event.id);
   return (
     <div className="space-y-5">
       <div>
         <h2 className="font-bold text-xl" style={{ color: C.text, fontFamily: '"Trajan Pro 3", Cambria, serif' }}>Event Metrics</h2>
         <p className="text-sm mt-1" style={{ color: C.muted }}>Event-specific registration, attendance, waitlist, CSV, and certificate summary.</p>
       </div>
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <SummaryCard label="Registered" value={event.registrationCount} color={C.teal} />
         <SummaryCard label="Attendance Rate" value={`${attendanceRate}%`} color="#27AE60" />
         <SummaryCard label="Waitlist Rate" value={`${waitlistRate}%`} color={C.goldenrod} />
         <SummaryCard label="Certificates" value={certificateCount} color={C.maroon} />
+        <SummaryCard label="Feedback Avg." value={feedbackSummary ? `${feedbackSummary.averageRating}/5` : 'No data'} color={C.purple} />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="bg-white rounded-2xl border p-5" style={{ borderColor: C.border }}>
@@ -159,6 +163,9 @@ export function OrganizerEventDetail({
           </TabsContent>
           <TabsContent value="metrics">
             <EventMetrics event={event} certificateCount={certificateCount} />
+          </TabsContent>
+          <TabsContent value="feedback">
+            <FeedbackSummaryTab eventId={event.id} event={event} />
           </TabsContent>
           {canShowCsvVerification && (
             <TabsContent value="csv-uploads">

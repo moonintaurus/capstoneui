@@ -140,6 +140,74 @@ export interface CertSummary {
   notEligible: number;
 }
 
+
+export type FeedbackQuestionType = 'Rating' | 'Open Ended';
+export type FeedbackSummaryStatus = 'Collecting Responses' | 'Ready for Review' | 'Closed' | 'No Responses Yet';
+export type FeedbackSentiment = 'Positive' | 'Neutral' | 'Concern';
+
+export interface StandardFeedbackQuestion {
+  id: string;
+  section: string;
+  prompt: string;
+  type: FeedbackQuestionType;
+  required: boolean;
+  scale?: {
+    min: number;
+    max: number;
+    lowLabel: string;
+    highLabel: string;
+  };
+}
+
+export interface FeedbackRatingDistribution {
+  score: number;
+  label: string;
+  count: number;
+}
+
+export interface FeedbackQuestionResult {
+  questionId: string;
+  prompt: string;
+  averageScore: number;
+  responseCount: number;
+  positiveRate: number;
+  distribution: FeedbackRatingDistribution[];
+}
+
+export interface FeedbackTheme {
+  label: string;
+  mentions: number;
+  sentiment: FeedbackSentiment;
+}
+
+export interface FeedbackOpenEndedAnswer {
+  id: string;
+  respondentLabel: string;
+  submittedAt: string;
+  answer: string;
+}
+
+export interface FeedbackOpenEndedResult {
+  questionId: string;
+  prompt: string;
+  responseCount: number;
+  answers: FeedbackOpenEndedAnswer[];
+}
+
+export interface FeedbackSummary {
+  eventId: string;
+  eventTitle: string;
+  status: FeedbackSummaryStatus;
+  totalEligible: number;
+  totalResponses: number;
+  responseRate: number;
+  averageRating: number;
+  submittedUntil: string;
+  questionResults: FeedbackQuestionResult[];
+  commonThemes: FeedbackTheme[];
+  openEndedResponses: FeedbackOpenEndedResult[];
+}
+
 export const CATEGORY_COLORS: Record<EventCategory, string> = {
   'Supervisor Leadership': '#800000',
   GAD: '#D85848',
@@ -210,7 +278,7 @@ export const MOCK_CMO_EVENTS: CmoEvent[] = [
     certificateAvailable: true,
     surveyRequired: true,
     surveyStatus: 'Configured',
-    requirements: 'Participant must be a PUP employee and must complete the feedback survey.',
+    requirements: 'Participant must be a PUP employee and must complete the standardized feedback form.',
     attendanceRules: getAttendanceRules('Hybrid'),
     waitlistAvailable: true,
     generatedCertificates: 0,
@@ -257,7 +325,7 @@ export const MOCK_CMO_EVENTS: CmoEvent[] = [
     certificateAvailable: true,
     surveyRequired: true,
     surveyStatus: 'Configured',
-    requirements: 'Participants must use their institutional email address and complete the post-event survey.',
+    requirements: 'Participants must use their institutional email address and complete the standardized post-event feedback form.',
     attendanceRules: getAttendanceRules('Online'),
     waitlistAvailable: false,
     generatedCertificates: 0,
@@ -268,7 +336,7 @@ export const MOCK_CMO_EVENTS: CmoEvent[] = [
       { id: 'rh4', date: '2026-05-18', author: 'HR Office', action: 'Submitted', remarks: 'Submitted GAD forum proposal.' },
       { id: 'rh5', date: '2026-05-25', author: 'CMO', action: 'Approved', remarks: 'Approved. Organizer will be emailed for publication status.' },
     ],
-    organizerUpdates: ['Added Teams meeting details.', 'Confirmed survey questions.'],
+    organizerUpdates: ['Added Teams meeting details.', 'Confirmed that the standardized feedback form will be used.'],
   },
   {
     id: 'ce3',
@@ -345,8 +413,8 @@ export const MOCK_CMO_EVENTS: CmoEvent[] = [
     approvalStatus: 'Returned with Comments',
     certTemplateStatus: 'Not Uploaded',
     certificateAvailable: true,
-    surveyRequired: false,
-    surveyStatus: 'Not Required',
+    surveyRequired: true,
+    surveyStatus: 'Configured',
     requirements: 'Participants must be assigned to frontline service work.',
     attendanceRules: getAttendanceRules('Onsite'),
     waitlistAvailable: true,
@@ -436,8 +504,8 @@ export const MOCK_CMO_EVENTS: CmoEvent[] = [
     publishedAt: '2026-04-28T09:00',
     certTemplateStatus: 'Validated',
     certificateAvailable: true,
-    surveyRequired: false,
-    surveyStatus: 'Not Required',
+    surveyRequired: true,
+    surveyStatus: 'Configured',
     requirements: 'Participants must present registration confirmation at the entrance.',
     attendanceRules: getAttendanceRules('Onsite'),
     waitlistAvailable: true,
@@ -572,6 +640,264 @@ export const MOCK_CERT_SUMMARIES: CertSummary[] = MOCK_CMO_EVENTS
     pending: event.pendingCertificates,
     notEligible: event.notEligibleCertificates,
   }));
+
+
+export const STANDARD_FEEDBACK_QUESTIONS: StandardFeedbackQuestion[] = [
+  {
+    id: 'fq1',
+    section: 'Event Objectives and Relevance',
+    prompt: 'The event objectives were clearly explained.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq2',
+    section: 'Event Objectives and Relevance',
+    prompt: 'The topics discussed were relevant to my needs, interests, or role.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq3',
+    section: 'Event Objectives and Relevance',
+    prompt: 'The event provided useful knowledge, skills, or information that I can apply.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq4',
+    section: 'Speaker or Facilitator',
+    prompt: 'The speaker or facilitator explained the topic clearly.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq5',
+    section: 'Speaker or Facilitator',
+    prompt: 'The speaker or facilitator encouraged participation and engagement.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq6',
+    section: 'Speaker or Facilitator',
+    prompt: 'The examples, activities, or discussions helped me understand the topic better.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq7',
+    section: 'Event Organization',
+    prompt: 'The event was well organized and easy to follow.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq8',
+    section: 'Event Organization',
+    prompt: 'The event schedule, pacing, and duration were appropriate.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq9',
+    section: 'Accessibility and Platform Experience',
+    prompt: 'The venue or online platform was accessible and easy to use.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq10',
+    section: 'Communication and Instructions',
+    prompt: 'Announcements, reminders, and instructions before or during the event were clear.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq11',
+    section: 'SIGLA Attendance and Feedback Experience',
+    prompt: 'The event check-in or attendance verification process was easy to complete.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq12',
+    section: 'SIGLA Attendance and Feedback Experience',
+    prompt: 'The system made event registration, attendance, and feedback submission convenient.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq13',
+    section: 'Overall Evaluation',
+    prompt: 'Overall, I am satisfied with the event.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Very Dissatisfied', highLabel: 'Very Satisfied' },
+  },
+  {
+    id: 'fq14',
+    section: 'Overall Evaluation',
+    prompt: 'I would recommend similar events to other participants.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq15',
+    section: 'Open-Ended Feedback',
+    prompt: 'What did you like most about the event?',
+    type: 'Open Ended',
+    required: false,
+  },
+  {
+    id: 'fq16',
+    section: 'Open-Ended Feedback',
+    prompt: 'What parts of the event should be improved?',
+    type: 'Open Ended',
+    required: false,
+  },
+  {
+    id: 'fq17',
+    section: 'Open-Ended Feedback',
+    prompt: 'What topics, activities, or event formats would you like to see in the future?',
+    type: 'Open Ended',
+    required: false,
+  },
+  {
+    id: 'fq18',
+    section: 'Open-Ended Feedback',
+    prompt: 'Do you have any additional comments, concerns, or suggestions?',
+    type: 'Open Ended',
+    required: false,
+  },
+];
+
+const ratingLabels = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
+
+function ratingResult(questionId: string, prompt: string, averageScore: number, responseCount: number, positiveRate: number, counts: [number, number, number, number, number]): FeedbackQuestionResult {
+  return {
+    questionId,
+    prompt,
+    averageScore,
+    responseCount,
+    positiveRate,
+    distribution: counts.map((count, index) => ({ score: index + 1, label: ratingLabels[index], count })),
+  };
+}
+
+export const MOCK_FEEDBACK_SUMMARIES: FeedbackSummary[] = [
+  {
+    eventId: 'ce6',
+    eventTitle: 'PUP Founding Anniversary Celebration',
+    status: 'Ready for Review',
+    totalEligible: 812,
+    totalResponses: 684,
+    responseRate: 84,
+    averageRating: 4.6,
+    submittedUntil: '2026-05-27',
+    questionResults: [
+      ratingResult('fq1', 'The event objectives were clearly explained.', 4.7, 684, 94, [4, 10, 29, 141, 500]),
+      ratingResult('fq2', 'The topics discussed were relevant to my needs, interests, or role.', 4.6, 684, 91, [5, 14, 42, 160, 463]),
+      ratingResult('fq3', 'The event provided useful knowledge, skills, or information that I can apply.', 4.5, 684, 89, [7, 18, 50, 171, 438]),
+      ratingResult('fq4', 'The speaker or facilitator explained the topic clearly.', 4.7, 684, 94, [4, 10, 28, 146, 496]),
+      ratingResult('fq5', 'The speaker or facilitator encouraged participation and engagement.', 4.6, 684, 91, [6, 15, 41, 158, 464]),
+      ratingResult('fq6', 'The examples, activities, or discussions helped me understand the topic better.', 4.5, 684, 88, [8, 20, 54, 167, 435]),
+      ratingResult('fq7', 'The event was well organized and easy to follow.', 4.4, 684, 85, [12, 28, 62, 188, 394]),
+      ratingResult('fq8', 'The event schedule, pacing, and duration were appropriate.', 4.3, 684, 82, [17, 35, 71, 201, 360]),
+      ratingResult('fq9', 'The venue or online platform was accessible and easy to use.', 4.4, 684, 86, [10, 26, 60, 190, 398]),
+      ratingResult('fq10', 'Announcements, reminders, and instructions before or during the event were clear.', 4.5, 684, 88, [9, 21, 52, 176, 426]),
+      ratingResult('fq11', 'The event check-in or attendance verification process was easy to complete.', 4.2, 684, 78, [22, 48, 81, 215, 318]),
+      ratingResult('fq12', 'The system made event registration, attendance, and feedback submission convenient.', 4.3, 684, 82, [18, 36, 69, 204, 357]),
+      ratingResult('fq13', 'Overall, I am satisfied with the event.', 4.6, 684, 92, [5, 13, 35, 155, 476]),
+      ratingResult('fq14', 'I would recommend similar events to other participants.', 4.7, 684, 93, [5, 12, 30, 148, 489]),
+    ],
+    commonThemes: [
+      { label: 'Strong sense of university community', mentions: 188, sentiment: 'Positive' },
+      { label: 'Clear announcements and reminders', mentions: 124, sentiment: 'Positive' },
+      { label: 'Crowd management at venue entrances', mentions: 81, sentiment: 'Concern' },
+      { label: 'Request for more seating and shade areas', mentions: 64, sentiment: 'Concern' },
+      { label: 'Interest in more cultural performances', mentions: 51, sentiment: 'Neutral' },
+      { label: 'Smooth certificate and feedback process', mentions: 43, sentiment: 'Positive' },
+    ],
+    openEndedResponses: [
+      {
+        questionId: 'fq15',
+        prompt: 'What did you like most about the event?',
+        responseCount: 6,
+        answers: [
+          { id: 'ce6-fq15-r1', respondentLabel: 'R1', submittedAt: '2026-05-20 18:24', answer: 'I liked the recognition segment because it made the university community feel appreciated.' },
+          { id: 'ce6-fq15-r2', respondentLabel: 'R2', submittedAt: '2026-05-20 18:31', answer: 'The performances were enjoyable and helped make the celebration meaningful.' },
+          { id: 'ce6-fq15-r3', respondentLabel: 'R3', submittedAt: '2026-05-20 18:45', answer: 'The event was festive and organized. The reminders before the event were also clear.' },
+          { id: 'ce6-fq15-r4', respondentLabel: 'R4', submittedAt: '2026-05-20 19:02', answer: 'I appreciated how the event highlighted PUP history and service.' },
+          { id: 'ce6-fq15-r5', respondentLabel: 'R5', submittedAt: '2026-05-20 19:15', answer: 'The registration and certificate process through the system was convenient.' },
+          { id: 'ce6-fq15-r6', respondentLabel: 'R6', submittedAt: '2026-05-20 19:22', answer: 'The program helped bring students, employees, and alumni together.' },
+        ],
+      },
+      {
+        questionId: 'fq16',
+        prompt: 'What parts of the event should be improved?',
+        responseCount: 6,
+        answers: [
+          { id: 'ce6-fq16-r1', respondentLabel: 'R7', submittedAt: '2026-05-20 18:36', answer: 'Entrance lines were long. It would help to add more check-in lanes.' },
+          { id: 'ce6-fq16-r2', respondentLabel: 'R8', submittedAt: '2026-05-20 18:49', answer: 'There should be more seating areas and shade for participants.' },
+          { id: 'ce6-fq16-r3', respondentLabel: 'R9', submittedAt: '2026-05-20 19:03', answer: 'Crowd control near the stage can be improved.' },
+          { id: 'ce6-fq16-r4', respondentLabel: 'R10', submittedAt: '2026-05-20 19:11', answer: 'The event was good, but the schedule could be followed more strictly.' },
+          { id: 'ce6-fq16-r5', respondentLabel: 'R11', submittedAt: '2026-05-20 19:20', answer: 'Please provide clearer directions for different participant groups.' },
+          { id: 'ce6-fq16-r6', respondentLabel: 'R12', submittedAt: '2026-05-20 19:28', answer: 'The check-in process worked, but additional staff would make it faster.' },
+        ],
+      },
+      {
+        questionId: 'fq17',
+        prompt: 'What topics, activities, or event formats would you like to see in the future?',
+        responseCount: 5,
+        answers: [
+          { id: 'ce6-fq17-r1', respondentLabel: 'R13', submittedAt: '2026-05-20 18:58', answer: 'More cultural performances and exhibits from different colleges.' },
+          { id: 'ce6-fq17-r2', respondentLabel: 'R14', submittedAt: '2026-05-20 19:06', answer: 'A shorter program with parallel activity booths would be nice.' },
+          { id: 'ce6-fq17-r3', respondentLabel: 'R15', submittedAt: '2026-05-20 19:18', answer: 'More student-led activities and alumni sharing sessions.' },
+          { id: 'ce6-fq17-r4', respondentLabel: 'R16', submittedAt: '2026-05-20 19:25', answer: 'Interactive exhibits about PUP milestones would make the celebration more engaging.' },
+          { id: 'ce6-fq17-r5', respondentLabel: 'R17', submittedAt: '2026-05-20 19:35', answer: 'I would like more department booths and community service showcases.' },
+        ],
+      },
+      {
+        questionId: 'fq18',
+        prompt: 'Do you have any additional comments, concerns, or suggestions?',
+        responseCount: 4,
+        answers: [
+          { id: 'ce6-fq18-r1', respondentLabel: 'R18', submittedAt: '2026-05-20 19:40', answer: 'Overall, the event was meaningful and well attended.' },
+          { id: 'ce6-fq18-r2', respondentLabel: 'R19', submittedAt: '2026-05-20 19:46', answer: 'Please keep using the system for reminders because it helped me track the event.' },
+          { id: 'ce6-fq18-r3', respondentLabel: 'R20', submittedAt: '2026-05-20 19:51', answer: 'The organizers did well, but crowd flow should be planned better next time.' },
+          { id: 'ce6-fq18-r4', respondentLabel: 'R21', submittedAt: '2026-05-20 19:58', answer: 'Thank you for making the celebration inclusive for different members of the PUP community.' },
+        ],
+      },
+    ],
+  },
+];
+
+export function getEventFeedbackSummary(eventId: string) {
+  return MOCK_FEEDBACK_SUMMARIES.find(summary => summary.eventId === eventId);
+}
+
+export function isCompletedEvent(event: CmoEvent, referenceDate = new Date('2026-05-28T12:00:00')) {
+  return new Date(event.endDate) < referenceDate;
+}
+
+export function getFeedbackStatusForEvent(event: CmoEvent, referenceDate = new Date('2026-05-28T12:00:00')) {
+  if (!isCompletedEvent(event, referenceDate)) return 'Available After Event';
+  return getEventFeedbackSummary(event.id)?.status ?? 'No Responses Yet';
+}
 
 export const APPROVAL_STYLE: Record<ApprovalStatus, { bg: string; color: string }> = {
   Submitted: { bg: '#3F799818', color: '#3F7998' },
