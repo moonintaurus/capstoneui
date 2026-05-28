@@ -1,12 +1,14 @@
 import {
+  AlertTriangle,
   CalendarDays,
   Users,
   CheckCircle,
   Clock,
   Award,
   BarChart2,
+  PlusCircle,
 } from 'lucide-react';
-import { C } from './data';
+import { C, MOCK_EVENTS, needsCsvVerification } from './data';
 
 const monthlyMetrics = [
   {
@@ -39,32 +41,17 @@ const monthlyMetrics = [
   },
 ];
 
-const upcomingEvents = [
-  {
-    title: 'Tech Futures Summit',
-    date: 'May 30, 2026',
-    time: '9:00 AM',
-    modality: 'Hybrid',
+const upcomingEvents = MOCK_EVENTS
+  .filter(event => new Date(`${event.date}T00:00:00`).getTime() >= new Date('2026-05-28T00:00:00').getTime())
+  .slice(0, 3)
+  .map(event => ({
+    title: event.title,
+    date: event.date,
+    time: 'Scheduled',
+    modality: event.modality,
     status: 'Upcoming',
-    registered: 64,
-  },
-  {
-    title: 'Career Readiness Webinar',
-    date: 'June 3, 2026',
-    time: '1:00 PM',
-    modality: 'Online',
-    status: 'Upcoming',
-    registered: 42,
-  },
-  {
-    title: 'Student Consultation Schedule',
-    date: 'June 5, 2026',
-    time: '10:00 AM',
-    modality: 'Onsite',
-    status: 'Appointment-Based',
-    registered: 22,
-  },
-];
+    registered: event.registrationCount,
+  }));
 
 
 
@@ -111,7 +98,34 @@ function MetricCard({
   );
 }
 
-export function OverviewTab({ onSelectEvent }: { onSelectEvent?: (event: typeof upcomingEvents[0]) => void } = {}) {
+const quickActions = [
+  { label: 'Create Event', icon: PlusCircle, action: 'create' },
+  { label: 'Review Participants', icon: Users, action: 'participants' },
+  { label: 'Manage Events', icon: CalendarDays, action: 'events' },
+  { label: 'Release Certificates', icon: Award, action: 'certificates' },
+] as const;
+
+export function OverviewTab({
+  onCreateEvent,
+  onReviewParticipants,
+  onManageEvents,
+  onReleaseCertificates,
+  onOpenCsvVerificationList,
+}: {
+  onCreateEvent?: () => void;
+  onReviewParticipants?: () => void;
+  onManageEvents?: () => void;
+  onReleaseCertificates?: () => void;
+  onOpenCsvVerificationList?: () => void;
+} = {}) {
+  const eventsNeedingCsv = MOCK_EVENTS.filter(event => needsCsvVerification(event));
+  const quickActionHandlers = {
+    create: onCreateEvent,
+    participants: onReviewParticipants,
+    events: onManageEvents,
+    certificates: onReleaseCertificates,
+  };
+
   return (
     <div className="space-y-7">
       {/* Page title */}
@@ -124,6 +138,60 @@ export function OverviewTab({ onSelectEvent }: { onSelectEvent?: (event: typeof 
         </p>
       </div>
 
+      <section>
+        <div className="mb-3">
+          <h3 className="font-bold" style={{ color: C.text }}>
+            Quick Actions
+          </h3>
+        </div>
+
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {quickActions.map(action => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.label}
+                type="button"
+                onClick={quickActionHandlers[action.action]}
+                className="bg-white rounded-2xl border p-5 text-left transition-colors hover:bg-stone-50"
+                style={{ borderColor: C.border }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${C.maroon}10` }}>
+                    <Icon className="w-5 h-5" style={{ color: C.maroon }} />
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: C.text }}>{action.label}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {eventsNeedingCsv.length > 0 && (
+        <button
+          type="button"
+          onClick={onOpenCsvVerificationList}
+          className="w-full bg-white rounded-2xl border p-5 text-left transition-colors hover:bg-stone-50"
+          style={{ borderColor: C.tangerine + '40' }}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${C.tangerine}14` }}>
+                <AlertTriangle className="w-5 h-5" style={{ color: C.tangerine }} />
+              </div>
+              <div>
+                <h3 className="font-bold" style={{ color: C.text }}>Completed Events Needing CSV Verification</h3>
+                <p className="text-sm mt-1" style={{ color: C.muted }}>
+                  {eventsNeedingCsv.length} completed online or hybrid event{eventsNeedingCsv.length === 1 ? '' : 's'} need event-level CSV verification.
+                </p>
+              </div>
+            </div>
+            <span className="text-sm font-bold whitespace-nowrap" style={{ color: C.maroon }}>Select Event</span>
+          </div>
+        </button>
+      )}
+
       {/* Total Events */}
       <div
         className="bg-white rounded-2xl border p-6"
@@ -135,7 +203,7 @@ export function OverviewTab({ onSelectEvent }: { onSelectEvent?: (event: typeof 
               Total Events
             </p>
             <h3 className="text-4xl font-bold" style={{ color: C.maroon }}>
-              6
+              {MOCK_EVENTS.length}
             </h3>
             <p className="text-sm mt-2" style={{ color: C.sub }}>
               All events created by your organizer account.

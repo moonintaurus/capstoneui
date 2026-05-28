@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   X, Award, Calendar, MapPin, Globe, Users, Shield, Clock,
-  Check, ChevronRight, AlertCircle, Info, Tag, Building2
+  Check, Info, Tag, Building2
 } from 'lucide-react';
-import type { Event, TimeSlot } from './data';
+import type { Event } from './data';
 import { C, CATEGORY_COLORS } from './data';
 
 function Badge({ label, bg, color }: { label: string; bg: string; color: string }) {
@@ -25,54 +25,6 @@ function DetailRow({ icon: Icon, label, value, accent }: { icon: React.ElementTy
   );
 }
 
-function SlotRow({ slot, onSelect, selected }: { slot: TimeSlot; onSelect: (id: string) => void; selected: boolean }) {
-  const full = slot.status === 'Full';
-  return (
-    <div className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-200 ${selected ? 'shadow-sm' : ''}`}
-      style={{
-        borderColor: selected ? C.maroon : full ? 'rgba(128,0,0,0.08)' : 'rgba(128,0,0,0.10)',
-        backgroundColor: selected ? C.maroon + '08' : full ? '#faf8f5' : 'white',
-        opacity: full && !selected ? 0.7 : 1,
-      }}>
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: full ? '#f0ebe0' : C.maroon + '12' }}>
-          <Clock className="w-4 h-4" style={{ color: full ? C.muted : C.maroon }} />
-        </div>
-        <div>
-          <p className="text-sm font-semibold" style={{ color: C.text }}>{slot.time}</p>
-          <p className="text-xs" style={{ color: C.muted }}>{slot.date}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-3">
-        <div className="text-right">
-          <p className="text-xs font-semibold" style={{ color: full ? C.coral : C.green }}>
-            {full ? 'Full' : `${slot.remaining} left`}
-          </p>
-          <p className="text-xs" style={{ color: C.muted }}>/ {slot.capacity}</p>
-        </div>
-        {full ? (
-          <button
-            className="px-3 py-2 rounded-lg text-xs font-semibold border transition-all"
-            style={{ borderColor: C.coral, color: C.coral }}
-            onClick={() => onSelect(slot.id)}
-          >
-            Waitlist
-          </button>
-        ) : (
-          <button
-            className="px-3 py-2 rounded-lg text-xs font-semibold text-white transition-all"
-            style={{ backgroundColor: selected ? C.maroon : C.maroon, opacity: selected ? 1 : 0.85 }}
-            onClick={() => onSelect(slot.id)}
-          >
-            {selected ? <Check className="w-4 h-4" /> : 'Select'}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 type ModalState = 'details' | 'confirming' | 'confirmed';
 
 export function EventModal({
@@ -85,23 +37,16 @@ export function EventModal({
   onRegistered: (eventId: string, slotId?: string) => void;
 }) {
   const [state, setState] = useState<ModalState>('details');
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const catColor = CATEGORY_COLORS[event.category] ?? C.teal;
-  const isAppt = event.eventType === 'Appointment-Based';
   const isAlreadyRegistered = event.registrationStatus === 'Registered';
   const isWaitlisted = event.registrationStatus === 'Waitlisted';
-
-  const selectedSlotData = event.timeSlots?.find(s => s.id === selectedSlot);
-  const isSlotFull = selectedSlotData?.status === 'Full';
-
-  const canConfirm = !isAppt || (selectedSlot !== null);
+  const joiningWaitlist = event.remainingSlots === 0 && event.hasWaitlist;
 
   const handleConfirm = () => {
-    if (!canConfirm) return;
     setState('confirming');
     setTimeout(() => {
       setState('confirmed');
-      onRegistered(event.id, selectedSlot ?? undefined);
+      onRegistered(event.id);
     }, 1400);
   };
 
@@ -166,7 +111,7 @@ export function EventModal({
                 />
                 <DetailRow icon={Calendar} label="Schedule" value={`${event.startDate} → ${event.endDate}`} />
                 <DetailRow icon={Users} label="Capacity" value={`${event.maxParticipants} participants max`} />
-                <DetailRow icon={Users} label="Remaining Slots" value={`${event.remainingSlots} slots left`} accent={event.remainingSlots < 10 ? C.coral : C.green} />
+                <DetailRow icon={Users} label="Remaining Seats" value={`${event.remainingSlots} seats left`} accent={event.remainingSlots < 10 ? C.coral : C.green} />
               </div>
 
               {/* Status */}
@@ -185,7 +130,7 @@ export function EventModal({
               {event.hasWaitlist && !isAlreadyRegistered && !isWaitlisted && (
                 <div className="mt-4 p-3 rounded-xl flex items-center gap-2" style={{ backgroundColor: C.indigo + '08', border: `1px solid ${C.indigo}20` }}>
                   <Info className="w-3.5 h-3.5" style={{ color: C.indigo }} />
-                  <p className="text-xs" style={{ color: C.indigo }}>Waitlist available if slots fill up</p>
+                  <p className="text-xs" style={{ color: C.indigo }}>Waitlist available if seats fill up</p>
                 </div>
               )}
               <div className="mt-4 p-3 rounded-xl" style={{ backgroundColor: C.maroon + '06', border: `1px solid ${C.maroon}12` }}>
@@ -207,7 +152,7 @@ export function EventModal({
               {!isAlreadyRegistered && !isWaitlisted && (
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: C.muted }}>
-                    {isAppt ? 'Select a Time Slot' : 'Registration'}
+                    Registration
                   </p>
 
                   {/* Confirmed state */}
@@ -217,11 +162,8 @@ export function EventModal({
                         <Check className="w-6 h-6 text-white" />
                       </div>
                       <h3 className="font-bold mb-1" style={{ color: C.green }}>
-                        {isSlotFull ? 'Added to Waitlist' : 'Registration Confirmed!'}
+                        {joiningWaitlist ? 'Added to Waitlist' : 'Registration Confirmed!'}
                       </h3>
-                      <p className="text-xs mb-3" style={{ color: C.sub }}>
-                        {isAppt && selectedSlotData && `Slot: ${selectedSlotData.time} — ${selectedSlotData.date}`}
-                      </p>
                       <p className="text-xs" style={{ color: C.muted }}>
                         A confirmation has been sent to your registered email address.
                       </p>
@@ -232,36 +174,11 @@ export function EventModal({
                         style={{ borderColor: C.maroon, borderTopColor: 'transparent' }} />
                       <p className="text-sm font-semibold" style={{ color: C.maroon }}>Processing registration…</p>
                     </div>
-                  ) : isAppt && event.timeSlots ? (
-                    <>
-                      <div className="space-y-2 mb-4">
-                        {event.timeSlots.map(slot => (
-                          <SlotRow
-                            key={slot.id}
-                            slot={slot}
-                            selected={selectedSlot === slot.id}
-                            onSelect={id => setSelectedSlot(selectedSlot === id ? null : id)}
-                          />
-                        ))}
-                      </div>
-                      {selectedSlot && (
-                        <button
-                          onClick={handleConfirm}
-                          className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all"
-                          style={{ background: `linear-gradient(135deg, ${C.maroon} 0%, ${C.maroonDark} 100%)`, boxShadow: `0 6px 18px ${C.maroon}35` }}
-                        >
-                          {isSlotFull ? 'Join Waitlist for this Slot' : 'Confirm Slot'}
-                        </button>
-                      )}
-                      {!selectedSlot && (
-                        <p className="text-xs text-center" style={{ color: C.muted }}>Select a time slot above to continue.</p>
-                      )}
-                    </>
                   ) : (
                     <div>
                       <div className="p-4 rounded-xl border mb-4" style={{ borderColor: C.border, backgroundColor: C.cream }}>
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold" style={{ color: C.muted }}>Available Slots</span>
+                          <span className="text-xs font-semibold" style={{ color: C.muted }}>Available Seats</span>
                           <span className="text-sm font-bold" style={{ color: event.remainingSlots < 10 ? C.coral : C.green }}>
                             {event.remainingSlots} remaining
                           </span>

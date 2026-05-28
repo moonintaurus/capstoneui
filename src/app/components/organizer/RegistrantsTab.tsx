@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Trash2 } from 'lucide-react';
 import { C, MOCK_REGISTRANTS, CERT_STATUS_STYLE, ATT_STATUS_STYLE, MOCK_EVENTS } from './data';
 
 export function RegistrantsTab({ eventId }: { eventId?: string }) {
+  const [registrants, setRegistrants] = useState(MOCK_REGISTRANTS);
   const [search, setSearch] = useState('');
   const [filterEvent, setFilterEvent] = useState('All');
   const [filterReg, setFilterReg] = useState('All');
+  const [feedback, setFeedback] = useState('');
 
   const selectedEventTitle = eventId ? MOCK_EVENTS.find(ev => ev.id === eventId)?.title : undefined;
 
-  const filtered = MOCK_REGISTRANTS.filter(r => {
+  const filtered = registrants.filter(r => {
     const q = search.toLowerCase();
     const matchSearch = !q || r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q) || r.program.toLowerCase().includes(q);
     const matchEvent = eventId ? r.eventId === eventId : filterEvent === 'All' || r.eventId === filterEvent;
@@ -49,11 +51,16 @@ export function RegistrantsTab({ eventId }: { eventId?: string }) {
       </div>
 
       <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
+        {feedback && (
+          <div className="px-5 py-3 text-sm font-semibold border-b" style={{ borderColor: '#27AE6040', backgroundColor: '#27AE6008', color: '#1a8a44' }}>
+            {feedback}
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: C.cream }}>
-                {['Participant Name', 'Email', 'Dept.', 'Program', 'Event', 'Reg. Status', 'Time Slot', 'Attendance', 'Certificate'].map(h => (
+                {['Participant Name', 'Email', 'Dept.', 'Program', 'Event', 'Reg. Status', 'Attendance', 'Certificate', ...(eventId ? ['Actions'] : [])].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-bold whitespace-nowrap" style={{ color: C.muted }}>{h}</th>
                 ))}
               </tr>
@@ -73,18 +80,33 @@ export function RegistrantsTab({ eventId }: { eventId?: string }) {
                     <td className="px-4 py-3.5">
                       <span className="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap" style={{ backgroundColor: regColor.bg, color: regColor.color }}>{r.regStatus}</span>
                     </td>
-                    <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.sub }}>{r.timeSlot}</td>
                     <td className="px-4 py-3.5">
                       <span className="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap" style={{ backgroundColor: att.bg, color: att.color }}>{r.attendanceStatus}</span>
                     </td>
                     <td className="px-4 py-3.5">
                       <span className="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap" style={{ backgroundColor: cert.bg, color: cert.color }}>{r.certStatus}</span>
                     </td>
+                    {eventId && (
+                      <td className="px-4 py-3.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRegistrants(prev => prev.filter(item => item.id !== r.id));
+                            setFeedback(`${r.name} was removed from this event.`);
+                          }}
+                          className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-red-50"
+                          style={{ color: C.coral }}
+                          title="Remove registrant"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={9} className="px-4 py-10 text-center text-sm" style={{ color: C.muted }}>No registrants match your filters.</td></tr>
+                <tr><td colSpan={eventId ? 9 : 8} className="px-4 py-10 text-center text-sm" style={{ color: C.muted }}>No registrants match your filters.</td></tr>
               )}
             </tbody>
           </table>

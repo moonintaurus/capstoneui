@@ -68,11 +68,11 @@ export function AttendanceTab({ eventId }: { eventId?: string }) {
                     <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.sub }}>{r.modality}</td>
                     <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.sub }}>{r.checkInTime}</td>
                     <td className="px-4 py-3.5">
-                      {r.modality === 'Online' ? <span className="text-xs" style={{ color: C.muted }}>N/A</span> : <VerifyIcon yes={r.gpsVerified} />}
+                      {r.modality === 'Online' ? <span className="text-xs" style={{ color: C.muted }}>Not required</span> : <VerifyIcon yes={r.gpsVerified} />}
                     </td>
                     <td className="px-4 py-3.5"><VerifyIcon yes={r.biometricVerified} /></td>
                     <td className="px-4 py-3.5">
-                      {r.modality === 'Onsite' ? <span className="text-xs" style={{ color: C.muted }}>N/A</span> : <VerifyIcon yes={r.csvMatched} />}
+                      {r.modality === 'Onsite' ? <span className="text-xs" style={{ color: C.muted }}>Not required</span> : <VerifyIcon yes={r.csvMatched} />}
                     </td>
                     <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.sub }}>{r.attendanceDuration}</td>
                     <td className="px-4 py-3.5">

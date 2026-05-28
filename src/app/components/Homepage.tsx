@@ -103,7 +103,7 @@ const features = [
   {
     icon: CheckCircle2,
     title: 'Fast Registration',
-    description: 'Join regular events or choose available schedules for appointment-based activities.',
+    description: 'Join regular university events with first-come, first-served registration.',
     accent: DEEP_TEAL,
   },
   {
@@ -457,7 +457,7 @@ export function Homepage() {
                         >
                           {ev.slots}
                         </span>{' '}
-                        of {ev.totalSlots} slots remaining
+                        of {ev.totalSlots} seats remaining
                       </span>
                     </div>
                   </div>

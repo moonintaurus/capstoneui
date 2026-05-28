@@ -15,11 +15,10 @@ function ModalityBadge({ modality }: { modality: string }) {
 }
 
 function TypeBadge({ type }: { type: string }) {
-  const isAppt = type === 'Appointment-Based';
   return (
     <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
-      style={{ backgroundColor: isAppt ? C.goldenrod + '18' : C.green + '15', color: isAppt ? C.goldenrod : C.green }}>
-      {isAppt ? 'Appt.' : 'Regular'}
+      style={{ backgroundColor: C.green + '15', color: C.green }}>
+      {type}
     </span>
   );
 }
@@ -73,7 +72,7 @@ function RecommendedCard({ event, onView }: { event: Event; onView: (e: Event) =
             <span>
               <span className="font-semibold" style={{ color: event.remainingSlots < 15 ? C.coral : C.text }}>
                 {event.remainingSlots}
-              </span> slots left
+              </span> seats left
             </span>
           </div>
         </div>
@@ -139,7 +138,7 @@ function UpcomingCard({ event, onView }: { event: Event; onView: (e: Event) => v
             <span>
               <span className="font-semibold" style={{ color: event.remainingSlots < 15 ? C.coral : C.text }}>
                 {event.remainingSlots}
-              </span> / {event.maxParticipants} slots
+              </span> / {event.maxParticipants} seats
             </span>
           </div>
         </div>
@@ -169,7 +168,6 @@ export function HomeTab({ onViewEvent, filter }: { onViewEvent: (e: Event) => vo
     if (filter === 'Online') return e.modality === 'Online';
     if (filter === 'Hybrid') return e.modality === 'Hybrid';
     if (filter === 'Regular') return e.eventType === 'Regular';
-    if (filter === 'Appointment-Based') return e.eventType === 'Appointment-Based';
     if (filter === 'With Certificate') return e.hasCertificate;
     return true;
   });

@@ -42,7 +42,7 @@ export function CmoSettingsTab() {
 
         <div className="pt-4 border-t" style={{ borderColor: C.border }}>
           <p className="text-xs leading-relaxed" style={{ color: C.muted }}>
-            Approval decisions and event status updates are communicated to organizers via email. There is no in-app notification center.
+            Approval decisions and event status updates are communicated to organizers through email updates only.
           </p>
         </div>
       </div>

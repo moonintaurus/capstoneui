@@ -11,7 +11,7 @@ export function WaitlistTab({ eventId }: { eventId?: string }) {
     <div>
       <div className="mb-6">
         <h2 className="font-bold text-xl" style={{ color: C.text, fontFamily: '"Trajan Pro 3", Cambria, serif' }}>Waitlist</h2>
-        <p className="text-sm mt-1" style={{ color: C.muted }}>Participants waiting for an available slot.</p>
+        <p className="text-sm mt-1" style={{ color: C.muted }}>Participants waiting for available event capacity.</p>
       </div>
 
       <div className="flex items-center gap-3 mb-5">
@@ -33,7 +33,7 @@ export function WaitlistTab({ eventId }: { eventId?: string }) {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: C.cream }}>
-                {['Participant', 'Email', 'Dept.', 'Program', 'Event', 'Time Slot', 'Actions'].map(h => (
+                {['Participant', 'Email', 'Dept.', 'Program', 'Event', 'Actions'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-bold" style={{ color: C.muted }}>{h}</th>
                 ))}
               </tr>
@@ -46,7 +46,6 @@ export function WaitlistTab({ eventId }: { eventId?: string }) {
                   <td className="px-4 py-3.5 text-xs" style={{ color: C.sub }}>{r.department}</td>
                   <td className="px-4 py-3.5 text-xs" style={{ color: C.sub }}>{r.program}</td>
                   <td className="px-4 py-3.5 text-xs max-w-[160px]"><p className="truncate" style={{ color: C.sub }}>{r.eventTitle}</p></td>
-                  <td className="px-4 py-3.5 text-xs" style={{ color: C.sub }}>{r.timeSlot}</td>
                   <td className="px-4 py-3.5">
                     <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors hover:bg-stone-50"
                       style={{ borderColor: C.teal, color: C.teal }}>
@@ -56,7 +55,7 @@ export function WaitlistTab({ eventId }: { eventId?: string }) {
                 </tr>
               ))}
               {waitlisted.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sm" style={{ color: C.muted }}>No waitlisted participants.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-sm" style={{ color: C.muted }}>No waitlisted participants.</td></tr>
               )}
             </tbody>
           </table>

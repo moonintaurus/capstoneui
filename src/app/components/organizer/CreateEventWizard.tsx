@@ -1,14 +1,10 @@
 import { useState } from 'react';
-import { X, Upload, Plus, Trash2, CheckCircle2, Eye, ChevronRight } from 'lucide-react';
-import { C } from './data';
+import { X, Upload, CheckCircle2, Eye, ChevronRight } from 'lucide-react';
+import { C, EVENT_CATEGORIES } from './data';
 import type { OrgEvent } from './data';
 
-const CATEGORIES = ['Academic', 'Leadership', 'Technology', 'Wellness', 'Advocacy', 'Cultural', 'Sports', 'Career', 'Research', 'Community Service'];
-const CERT_PLACEHOLDERS = ['Participant Name', 'Event Title', 'Event Date', 'Organizer Name', 'Certificate Number', 'Date Issued', 'Authorized Signatory', 'Organization Logo'];
-
-interface Slot { id: string; label: string; start: string; end: string; venue: string; max: number; }
-
-const STEPS = ['Basic Details', 'Event Setup', 'Time Slots', 'Certificate', 'Review & Submit'];
+const CERT_PLACEHOLDERS = ['Participant Name', 'Event Title', 'Event Date', 'Organizer Name', 'Certificate Number', 'Date Issued', 'Authorized Signatory', 'Organization Logo or Event Logo'];
+const STEPS = ['Basic Details', 'Event Setup', 'Certificate', 'Review & Submit'];
 
 function StepDot({ n, label, active, done }: { n: number; label: string; active: boolean; done: boolean }) {
   return (
@@ -78,24 +74,14 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
   const [exclusivity, setExclusivity] = useState('Open to All');
   const [requirements, setRequirements] = useState('');
 
-  const [eventType, setEventType] = useState<'Regular' | 'Schedule-Based'>('Regular');
   const [modality, setModality] = useState<'Onsite' | 'Online' | 'Hybrid'>('Onsite');
   const [location, setLocation] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [maxParticipants, setMaxParticipants] = useState('50');
 
-  const [slots, setSlots] = useState<Slot[]>([
-    { id: '1', label: 'Morning Session', start: '', end: '', venue: '', max: 25 },
-  ]);
-
   const [certPlaceholders, setCertPlaceholders] = useState<string[]>(['Participant Name', 'Event Title', 'Event Date']);
   const [certValidated, setCertValidated] = useState(false);
-
-  const addSlot = () => setSlots(s => [...s, { id: Date.now().toString(), label: '', start: '', end: '', venue: '', max: 25 }]);
-  const removeSlot = (id: string) => setSlots(s => s.filter(sl => sl.id !== id));
-  const updateSlot = (id: string, field: keyof Slot, val: string | number) =>
-    setSlots(s => s.map(sl => sl.id === id ? { ...sl, [field]: val } : sl));
 
   const togglePlaceholder = (p: string) => setCertPlaceholders(prev =>
     prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]
@@ -103,52 +89,62 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
 
   const handleSubmit = () => {
     setSubmitted(true);
-    onCreated({ title, tagline, description, category, type: eventType, modality, date: startDate, endDate, location, maxParticipants: Number(maxParticipants), approvalStatus: 'Submitted', certTemplateStatus: certValidated ? 'Validated' : 'Not Uploaded', registrationCount: 0, waitlistCount: 0 });
+    onCreated({
+      title,
+      tagline,
+      description,
+      category: category as OrgEvent['category'],
+      type: 'Regular',
+      modality,
+      date: startDate,
+      endDate,
+      location,
+      maxParticipants: Number(maxParticipants),
+      approvalStatus: 'Submitted',
+      certTemplateStatus: certValidated ? 'Validated' : 'Not Uploaded',
+      csvVerificationStatus: modality === 'Onsite' ? 'Not Required' : 'Not Uploaded',
+      registrationCount: 0,
+      waitlistCount: 0,
+      requirements,
+      exclusivity,
+      onlinePlatform: modality === 'Onsite' ? 'Not Applicable' : undefined,
+    });
   };
-
-  const showSlotStep = eventType === 'Schedule-Based';
-  const totalSteps = showSlotStep ? 5 : 4;
-  const stepLabels = showSlotStep ? STEPS : STEPS.filter((_, i) => i !== 2);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b flex-shrink-0" style={{ borderColor: C.border }}>
           <div>
             <h2 className="font-bold text-lg" style={{ color: C.text, fontFamily: '"Trajan Pro 3", Cambria, serif' }}>Create New Event</h2>
-            <p className="text-xs mt-0.5" style={{ color: C.muted }}>Step {step} of {totalSteps} — {stepLabels[step - 1]}</p>
+            <p className="text-xs mt-0.5" style={{ color: C.muted }}>Step {step} of {STEPS.length} - {STEPS[step - 1]}</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors" style={{ color: C.muted }}>
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Step indicator */}
         <div className="px-6 pt-4 pb-2 flex items-start gap-3 flex-shrink-0">
-          {stepLabels.map((label, i) => (
-            <div key={i} className="flex items-center flex-1">
+          {STEPS.map((label, i) => (
+            <div key={label} className="flex items-center flex-1">
               <StepDot n={i + 1} label={label} active={step === i + 1} done={step > i + 1} />
-              {i < stepLabels.length - 1 && (
+              {i < STEPS.length - 1 && (
                 <div className="flex-1 h-0.5 mx-1 mt-[-14px]" style={{ backgroundColor: step > i + 1 ? '#27AE60' : C.border }} />
               )}
             </div>
           ))}
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
-
-          {/* ── Step 1: Basic Details ── */}
           {step === 1 && (
             <div className="space-y-4">
-              <Input label="Event Title" required value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Data Science Workshop 2026" />
+              <Input label="Event Title" required value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Gender and Development Awareness Forum" />
               <Input label="Tagline" value={tagline} onChange={e => setTagline(e.target.value)} placeholder="Short catchy phrase for the event" />
               <Textarea label="Description" required value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe the event, its goals, and what participants will gain..." rows={4} />
               <div className="grid grid-cols-2 gap-4">
                 <Select label="Category" required value={category} onChange={e => setCategory(e.target.value)}>
                   <option value="">Select category</option>
-                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                  {EVENT_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                 </Select>
                 <Select label="Exclusivity" value={exclusivity} onChange={e => setExclusivity(e.target.value)}>
                   <option>Open to All</option>
@@ -162,26 +158,15 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
                 style={{ borderColor: C.border, backgroundColor: C.cream }}>
                 <Upload className="w-8 h-8" style={{ color: C.muted }} />
                 <p className="text-sm font-semibold" style={{ color: C.sub }}>Upload Cover Image</p>
-                <p className="text-xs" style={{ color: C.muted }}>PNG, JPG up to 5MB · 1280×720 recommended</p>
+                <p className="text-xs" style={{ color: C.muted }}>PNG, JPG up to 5MB - 1280x720 recommended</p>
               </div>
             </div>
           )}
 
-          {/* ── Step 2: Event Setup ── */}
           {step === 2 && (
             <div className="space-y-4">
-              <div>
-                <FieldLabel required>Event Type</FieldLabel>
-                <div className="grid grid-cols-2 gap-3">
-                  {(['Regular', 'Schedule-Based'] as const).map(t => (
-                    <button key={t} type="button" onClick={() => setEventType(t)}
-                      className="py-3 px-4 rounded-xl border text-sm font-semibold transition-all"
-                      style={{ borderColor: eventType === t ? C.maroon : C.border, backgroundColor: eventType === t ? C.maroon + '10' : 'transparent', color: eventType === t ? C.maroon : C.sub }}>
-                      {t}
-                    </button>
-                  ))}
-                </div>
-                {eventType === 'Schedule-Based' && <p className="text-xs mt-2" style={{ color: C.muted }}>You'll define time slots in the next step.</p>}
+              <div className="rounded-xl border p-4 text-xs leading-relaxed" style={{ borderColor: C.border, backgroundColor: '#fff', color: C.sub }}>
+                All events use regular registration. Participants register while seats are available or join the event waitlist once capacity is full.
               </div>
               <div>
                 <FieldLabel required>Modality</FieldLabel>
@@ -198,62 +183,27 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
               <Input
                 label={modality === 'Online' ? 'Platform' : modality === 'Hybrid' ? 'Venue / Platform' : 'Venue / Location'}
                 required value={location} onChange={e => setLocation(e.target.value)}
-                placeholder={modality === 'Online' ? 'e.g. Zoom, Microsoft Teams' : 'e.g. CCIS Lab 301, Main Auditorium'} />
+                placeholder={modality === 'Online' ? 'e.g. Zoom, Microsoft Teams' : 'e.g. PUP Main Hall, Main Auditorium'} />
               <div className="grid grid-cols-2 gap-4">
                 <Input label="Start Date & Time" required type="datetime-local" value={startDate} onChange={e => setStartDate(e.target.value)} />
                 <Input label="End Date & Time" required type="datetime-local" value={endDate} onChange={e => setEndDate(e.target.value)} />
               </div>
-              {eventType === 'Regular' && (
-                <Input label="Maximum Participants" required type="number" value={maxParticipants} onChange={e => setMaxParticipants(e.target.value)} min="1" />
-              )}
-            </div>
-          )}
-
-          {/* ── Step 3: Schedule-Based Slots (only if applicable) ── */}
-          {step === 3 && showSlotStep && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: C.text }}>Time Slots</p>
-                  <p className="text-xs" style={{ color: C.muted }}>Define each available time slot for participants to choose from.</p>
-                </div>
-                <button onClick={addSlot} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all"
-                  style={{ borderColor: C.maroon, color: C.maroon }}>
-                  <Plus className="w-3.5 h-3.5" /> Add Slot
-                </button>
+              <Input label="Maximum Participants" required type="number" value={maxParticipants} onChange={e => setMaxParticipants(e.target.value)} min="1" />
+              <div className="rounded-xl border p-4 text-xs leading-relaxed" style={{ borderColor: C.border, backgroundColor: '#fff', color: C.sub }}>
+                {modality === 'Onsite' && 'Onsite attendance requires GPS/geofencing and face biometric verification.'}
+                {modality === 'Online' && 'Online attendance requires face biometric verification before unlocking the meeting link, then CSV attendance verification after the event.'}
+                {modality === 'Hybrid' && 'Hybrid attendance supports onsite and online participants depending on selected attendance mode.'}
               </div>
-              {slots.map((slot, idx) => (
-                <div key={slot.id} className="rounded-xl border p-4 space-y-3" style={{ borderColor: C.border, backgroundColor: C.cream }}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold" style={{ color: C.maroon }}>Slot {idx + 1}</span>
-                    {slots.length > 1 && (
-                      <button onClick={() => removeSlot(slot.id)} className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-red-50 transition-colors" style={{ color: C.coral }}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                  <Input label="Slot Label" value={slot.label} onChange={e => updateSlot(slot.id, 'label', e.target.value)} placeholder="e.g. Morning Session" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input label="Start" type="datetime-local" value={slot.start} onChange={e => updateSlot(slot.id, 'start', e.target.value)} />
-                    <Input label="End" type="datetime-local" value={slot.end} onChange={e => updateSlot(slot.id, 'end', e.target.value)} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input label="Venue / Platform" value={slot.venue} onChange={e => updateSlot(slot.id, 'venue', e.target.value)} placeholder="Room or link" />
-                    <Input label="Max Participants" type="number" value={String(slot.max)} onChange={e => updateSlot(slot.id, 'max', Number(e.target.value))} min="1" />
-                  </div>
-                </div>
-              ))}
             </div>
           )}
 
-          {/* ── Certificate Step ── */}
-          {((step === 4 && showSlotStep) || (step === 3 && !showSlotStep)) && (
+          {step === 3 && (
             <div className="space-y-5">
               <div className="rounded-xl border-2 border-dashed p-6 flex flex-col items-center gap-2 cursor-pointer"
                 style={{ borderColor: C.border, backgroundColor: C.cream }}>
                 <Upload className="w-8 h-8" style={{ color: C.muted }} />
                 <p className="text-sm font-semibold" style={{ color: C.sub }}>Upload Certificate Template</p>
-                <p className="text-xs" style={{ color: C.muted }}>PDF or DOCX with placeholder tags · Max 10MB</p>
+                <p className="text-xs" style={{ color: C.muted }}>PDF or DOCX with placeholder tags - Max 10MB</p>
               </div>
               <div>
                 <FieldLabel>Placeholder Chips</FieldLabel>
@@ -287,23 +237,22 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
             </div>
           )}
 
-          {/* ── Review & Submit ── */}
-          {((step === 5 && showSlotStep) || (step === 4 && !showSlotStep)) && (
+          {step === 4 && (
             <div className="space-y-4">
               {!submitted ? (
                 <>
                   <div className="rounded-xl border overflow-hidden divide-y" style={{ borderColor: C.border }}>
                     {[
-                      ['Event Title', title || '—'],
-                      ['Tagline', tagline || '—'],
-                      ['Category', category || '—'],
-                      ['Type', eventType],
+                      ['Event Title', title || '-'],
+                      ['Tagline', tagline || '-'],
+                      ['Category', category || '-'],
+                      ['Type', 'Regular'],
                       ['Modality', modality],
-                      ['Location / Platform', location || '—'],
-                      ['Start', startDate || '—'],
-                      ['End', endDate || '—'],
-                      ['Max Participants', eventType === 'Schedule-Based' ? `${slots.reduce((s, sl) => s + sl.max, 0)} (across ${slots.length} slots)` : maxParticipants],
-                      ['Certificate Template', certValidated ? 'Validated ✓' : 'Not uploaded'],
+                      ['Location / Platform', location || '-'],
+                      ['Start', startDate || '-'],
+                      ['End', endDate || '-'],
+                      ['Max Participants', maxParticipants],
+                      ['Certificate Template', certValidated ? 'Validated' : 'Not uploaded'],
                     ].map(([k, v]) => (
                       <div key={k} className="flex justify-between items-start px-4 py-3">
                         <span className="text-xs font-semibold flex-shrink-0 w-44" style={{ color: C.muted }}>{k}</span>
@@ -313,7 +262,7 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
                   </div>
                   <div className="rounded-xl border p-4 flex gap-3" style={{ borderColor: C.teal + '40', backgroundColor: C.teal + '08' }}>
                     <p className="text-xs leading-relaxed" style={{ color: C.sub }}>
-                      Submitting will send this event to the CMO for approval. You will receive an email notification once it has been reviewed. You may still edit the event while it is under review.
+                      Submitting will send this event to the CMO for approval. You will receive an email update once it has been reviewed. You may still edit the event while it is under review.
                     </p>
                   </div>
                 </>
@@ -332,7 +281,6 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
           )}
         </div>
 
-        {/* Footer */}
         {!submitted && (
           <div className="px-6 py-4 border-t flex justify-between gap-3 flex-shrink-0" style={{ borderColor: C.border }}>
             <button onClick={step === 1 ? onClose : () => setStep(s => s - 1)}
@@ -340,7 +288,7 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
               style={{ borderColor: C.border, color: C.sub }}>
               {step === 1 ? 'Cancel' : 'Back'}
             </button>
-            {((step < totalSteps)) ? (
+            {step < STEPS.length ? (
               <button onClick={() => setStep(s => s + 1)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
                 style={{ background: `linear-gradient(135deg, ${C.maroon} 0%, ${C.maroonDark} 100%)` }}>

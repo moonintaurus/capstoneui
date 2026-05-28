@@ -1,7 +1,7 @@
 // ── TYPES ─────────────────────────────────────────────────────────────────
 
 export type EventModality = 'Onsite' | 'Online' | 'Hybrid';
-export type EventType = 'Regular' | 'Appointment-Based';
+export type EventType = 'Regular';
 export type RegistrationStatus = 'Open' | 'Registered' | 'Waitlisted' | 'Full' | 'Cancelled' | 'Closed';
 export type CertificateStatus =
   | 'Not Available'
@@ -13,15 +13,6 @@ export type CertificateStatus =
   | 'Generating Certificate'
   | 'Released'
   | 'Not Eligible';
-
-export interface TimeSlot {
-  id: string;
-  date: string;
-  time: string;
-  capacity: number;
-  remaining: number;
-  status: 'Available' | 'Full';
-}
 
 export interface Event {
   id: string;
@@ -39,6 +30,8 @@ export interface Event {
   location?: string;
   platform?: string;
   platformLink?: string;
+  venueLatitude?: number;
+  venueLongitude?: number;
   startDate: string;
   endDate: string;
   maxParticipants: number;
@@ -46,10 +39,8 @@ export interface Event {
   hasCertificate: boolean;
   registrationStatus: RegistrationStatus;
   hasWaitlist: boolean;
-  timeSlots?: TimeSlot[];
   isRecommended?: boolean;
   tags: string[];
-  selectedSlot?: string;
   isFeatured?: boolean;
 }
 
@@ -118,6 +109,8 @@ export const ALL_EVENTS: Event[] = [
     exclusivity: 'Open to All',
     modality: 'Hybrid',
     location: 'CCIS Auditorium, Main Campus',
+    venueLatitude: 14.6535,
+    venueLongitude: 121.0517,
     platform: 'Zoom Webinar',
     platformLink: 'https://zoom.us/j/example',
     startDate: 'June 15, 2026 — 8:00 AM',
@@ -135,18 +128,20 @@ export const ALL_EVENTS: Event[] = [
   {
     id: 'e2',
     title: 'Leadership Bootcamp 2026',
-    tagline: 'Sharpen your leadership edge — one session at a time',
+    tagline: 'Sharpen your leadership edge in one focused seminar',
     description:
-      'An intensive appointment-based workshop series designed to develop leadership, communication, and team management skills. Each session accommodates a small group for a focused, interactive experience. Choose a time slot that fits your schedule.',
+      'An intensive workshop designed to develop leadership, communication, and team management skills through focused lectures, activities, and guided group exercises.',
     cover_image: '/coverpage.jpg',
       accentColor: C.maroon,
     organizer: 'Office of Student Services',
     organizerUnit: 'Office of the Vice President for Student Affairs and Services',
     category: 'Leadership',
-    eventType: 'Appointment-Based',
+    eventType: 'Regular',
     exclusivity: 'Open to All',
     modality: 'Onsite',
     location: 'Student Services Building, Room 204',
+    venueLatitude: 14.6509,
+    venueLongitude: 121.0496,
     startDate: 'June 22, 2026',
     endDate: 'June 22, 2026',
     maxParticipants: 30,
@@ -154,12 +149,7 @@ export const ALL_EVENTS: Event[] = [
     hasCertificate: true,
     registrationStatus: 'Open',
     hasWaitlist: false,
-    timeSlots: [
-      { id: 's1', date: 'June 22, 2026', time: '9:00 AM – 10:30 AM', capacity: 10, remaining: 3, status: 'Available' },
-      { id: 's2', date: 'June 22, 2026', time: '11:00 AM – 12:30 PM', capacity: 10, remaining: 0, status: 'Full' },
-      { id: 's3', date: 'June 22, 2026', time: '2:00 PM – 3:30 PM', capacity: 10, remaining: 7, status: 'Available' },
-    ],
-    tags: ['Leadership', 'Onsite', 'Appointment'],
+    tags: ['Leadership', 'Onsite', 'Workshop'],
     isRecommended: true,
   },
   {
@@ -177,6 +167,8 @@ export const ALL_EVENTS: Event[] = [
     exclusivity: 'Open to All',
     modality: 'Onsite',
     location: 'Graduate School Building, Room 301',
+    venueLatitude: 14.6480,
+    venueLongitude: 121.0455,
     startDate: 'June 18, 2026 — 1:00 PM',
     endDate: 'June 18, 2026 — 5:00 PM',
     maxParticipants: 60,
@@ -189,19 +181,21 @@ export const ALL_EVENTS: Event[] = [
   },
   {
     id: 'e4',
-    title: 'Career Counseling & Advising Session',
-    tagline: 'One-on-one guidance for your career path',
+    title: 'Career Counseling & Advising Forum',
+    tagline: 'Guidance for your career path',
     description:
-      'Book a personal career counseling session with a certified career development advisor. Discuss career goals, resume review, job search strategies, and professional development planning. Strictly appointment-based to ensure individualized attention.',
+      'A career development forum with certified advisors covering career goals, resume preparation, job search strategies, and professional development planning.',
     cover_image: '/coverpage.jpg',
       accentColor: C.indigo,
     organizer: 'Alumni Relations and Career Development Office',
     organizerUnit: 'Office of the Vice President for Student Affairs and Services',
     category: 'Career',
-    eventType: 'Appointment-Based',
+    eventType: 'Regular',
     exclusivity: 'Open to All',
     modality: 'Onsite',
     location: 'Career Development Center, Room 102',
+    venueLatitude: 14.6512,
+    venueLongitude: 121.0475,
     startDate: 'June 25, 2026',
     endDate: 'June 25, 2026',
     maxParticipants: 20,
@@ -209,13 +203,7 @@ export const ALL_EVENTS: Event[] = [
     hasCertificate: false,
     registrationStatus: 'Open',
     hasWaitlist: true,
-    timeSlots: [
-      { id: 'c1', date: 'June 25, 2026', time: '9:00 AM – 9:45 AM', capacity: 4, remaining: 1, status: 'Available' },
-      { id: 'c2', date: 'June 25, 2026', time: '10:00 AM – 10:45 AM', capacity: 4, remaining: 0, status: 'Full' },
-      { id: 'c3', date: 'June 25, 2026', time: '1:00 PM – 1:45 PM', capacity: 4, remaining: 3, status: 'Available' },
-      { id: 'c4', date: 'June 25, 2026', time: '2:00 PM – 2:45 PM', capacity: 4, remaining: 4, status: 'Available' },
-    ],
-    tags: ['Career', 'Onsite', 'Appointment'],
+    tags: ['Career', 'Onsite', 'Advising'],
     isRecommended: false,
   },
   {
@@ -233,6 +221,8 @@ export const ALL_EVENTS: Event[] = [
     exclusivity: 'Open to All',
     modality: 'Hybrid',
     location: 'University Amphitheater',
+    venueLatitude: 14.6525,
+    venueLongitude: 121.0485,
     platform: 'Google Meet',
     startDate: 'June 28, 2026 — 10:00 AM',
     endDate: 'July 2, 2026 — 4:00 PM',
@@ -285,6 +275,8 @@ export const ALL_EVENTS: Event[] = [
     exclusivity: 'Open to All',
     modality: 'Onsite',
     location: 'Barangay Sta. Mesa Community Hall',
+    venueLatitude: 14.6550,
+    venueLongitude: 121.0510,
     startDate: 'July 5, 2026 — 7:00 AM',
     endDate: 'July 5, 2026 — 3:00 PM',
     maxParticipants: 80,
@@ -335,7 +327,7 @@ export const PAST_EVENTS = [
 
 export const MY_UPCOMING: Event[] = [
   { ...ALL_EVENTS[0], registrationStatus: 'Registered' },
-  { ...ALL_EVENTS[1], registrationStatus: 'Registered', selectedSlot: 'June 22, 2026 — 2:00 PM – 3:30 PM' },
+  { ...ALL_EVENTS[1], registrationStatus: 'Registered' },
 ];
 
 export const MY_ONGOING: Event[] = [

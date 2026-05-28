@@ -47,7 +47,6 @@ function CertBadge({ status }: { status: CertificateStatus }) {
 function UpcomingCard({ event, onCancel }: { event: Event; onCancel: (id: string) => void }) {
   const catColor = CATEGORY_COLORS[event.category] ?? C.teal;
   const venue = event.modality === 'Online' ? event.platform : event.location;
-  const isAppt = event.eventType === 'Appointment-Based';
 
   return (
     <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
@@ -73,12 +72,6 @@ function UpcomingCard({ event, onCancel }: { event: Event; onCancel: (id: string
             <div className="flex items-center gap-2 text-xs" style={{ color: C.sub }}>
               {event.modality === 'Online' ? <Globe className="w-3.5 h-3.5" /> : <MapPin className="w-3.5 h-3.5" />}
               <span className="truncate">{venue}</span>
-            </div>
-          )}
-          {isAppt && event.selectedSlot && (
-            <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: C.maroon }}>
-              <Clock className="w-3.5 h-3.5" />
-              <span>Slot: {event.selectedSlot}</span>
             </div>
           )}
         </div>

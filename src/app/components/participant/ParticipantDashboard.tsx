@@ -12,7 +12,7 @@ import { CheckInModal } from './CheckInModal';
 type Tab = 'home' | 'explore' | 'recommended' | 'my-events' | 'certificates' | 'profile';
 
 const PARTICIPANT = { name: 'Maria Santos', initials: 'MS', college: 'CCIS', program: 'Computer Science' };
-const FILTER_CHIPS = ['All', 'Onsite', 'Online', 'Hybrid', 'Regular', 'Appointment-Based', 'With Certificate'];
+const FILTER_CHIPS = ['All', 'Onsite', 'Online', 'Hybrid', 'Regular', 'With Certificate'];
 
 const NAV = [
   { id: 'home' as Tab, label: 'Home', icon: Home },
@@ -134,13 +134,13 @@ function EventCard({ event, onView }: { event: Event; onView: (event: Event) => 
             {event.modality}
           </span>
           <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: C.green + '10', color: C.green }}>
-            {event.type}
+            {event.eventType}
           </span>
         </div>
 
         <h3 className="font-bold text-sm mb-2" style={{ color: C.text }}>{event.title}</h3>
-        <p className="text-xs mb-1" style={{ color: C.muted }}>{event.date}</p>
-        <p className="text-xs mb-4" style={{ color: C.muted }}>{event.slotsLeft ?? event.slots} slots left</p>
+        <p className="text-xs mb-1" style={{ color: C.muted }}>{event.startDate}</p>
+        <p className="text-xs mb-4" style={{ color: C.muted }}>{event.remainingSlots} seats left</p>
 
         <button
           onClick={() => onView(event)}
@@ -229,12 +229,12 @@ export function ParticipantDashboard() {
   const [checkInEvent, setCheckInEvent] = useState<Event | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const filteredEvents = ALL_EVENTS.filter((event: any) => {
+  const filteredEvents = ALL_EVENTS.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter =
       activeFilter === 'All' ||
       event.modality === activeFilter ||
-      event.type === activeFilter ||
+      event.eventType === activeFilter ||
       (activeFilter === 'With Certificate' && event.hasCertificate);
     return matchesSearch && matchesFilter;
   });
