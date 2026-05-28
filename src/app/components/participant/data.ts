@@ -5,7 +5,7 @@ export type EventType = 'Regular';
 export type RegistrationStatus = 'Open' | 'Registered' | 'Waitlisted' | 'Full' | 'Cancelled' | 'Closed';
 export type CertificateStatus =
   | 'Not Available'
-  | 'Survey Required'
+  | 'Feedback Required'
   | 'Pending Verification'
   | 'Template Missing'
   | 'Attendance Not Verified'
@@ -90,6 +90,176 @@ export const CATEGORY_COLORS: Record<string, string> = {
   Academic: C.slate,
   Cultural: C.mutedGold,
 };
+
+
+// ── STANDARDIZED FEEDBACK SURVEY ──────────────────────────────────────────
+
+export type FeedbackQuestionType = 'Rating' | 'Open Ended';
+
+export interface StandardFeedbackQuestion {
+  id: string;
+  section: string;
+  prompt: string;
+  type: FeedbackQuestionType;
+  required: boolean;
+  scale?: {
+    min: number;
+    max: number;
+    lowLabel: string;
+    highLabel: string;
+  };
+}
+
+export const FEEDBACK_RATING_SCALE = [
+  { value: 1, label: 'Strongly Disagree / Very Dissatisfied' },
+  { value: 2, label: 'Disagree / Dissatisfied' },
+  { value: 3, label: 'Neutral' },
+  { value: 4, label: 'Agree / Satisfied' },
+  { value: 5, label: 'Strongly Agree / Very Satisfied' },
+] as const;
+
+export const STANDARD_FEEDBACK_QUESTIONS: StandardFeedbackQuestion[] = [
+  {
+    id: 'fq1',
+    section: 'Event Content and Relevance',
+    prompt: 'The event objectives were clearly explained.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq2',
+    section: 'Event Content and Relevance',
+    prompt: 'The topics discussed were relevant to my needs, interests, or role.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq3',
+    section: 'Event Content and Relevance',
+    prompt: 'The event provided useful knowledge, skills, or information that I can apply.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq4',
+    section: 'Speaker and Facilitation',
+    prompt: 'The speaker or facilitator explained the topic clearly.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq5',
+    section: 'Speaker and Facilitation',
+    prompt: 'The speaker or facilitator encouraged participation and engagement.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq6',
+    section: 'Speaker and Facilitation',
+    prompt: 'The examples, activities, or discussions helped me understand the topic better.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq7',
+    section: 'Event Organization and Accessibility',
+    prompt: 'The event was well organized and easy to follow.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq8',
+    section: 'Event Organization and Accessibility',
+    prompt: 'The event schedule, pacing, and duration were appropriate.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq9',
+    section: 'Event Organization and Accessibility',
+    prompt: 'The venue or online platform was accessible and easy to use.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq10',
+    section: 'Event Organization and Accessibility',
+    prompt: 'Announcements, reminders, and instructions before or during the event were clear.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq11',
+    section: 'Attendance Verification and System Experience',
+    prompt: 'The event check-in or attendance verification process was easy to complete.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq12',
+    section: 'Attendance Verification and System Experience',
+    prompt: 'The system made event registration, attendance, and feedback submission convenient.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq13',
+    section: 'Overall Satisfaction',
+    prompt: 'Overall, I am satisfied with the event.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Very Dissatisfied', highLabel: 'Very Satisfied' },
+  },
+  {
+    id: 'fq14',
+    section: 'Overall Satisfaction',
+    prompt: 'I would recommend similar events to other participants.',
+    type: 'Rating',
+    required: true,
+    scale: { min: 1, max: 5, lowLabel: 'Strongly Disagree', highLabel: 'Strongly Agree' },
+  },
+  {
+    id: 'fq15',
+    section: 'Open-Ended Feedback',
+    prompt: 'What did you like most about the event?',
+    type: 'Open Ended',
+    required: false,
+  },
+  {
+    id: 'fq16',
+    section: 'Open-Ended Feedback',
+    prompt: 'What parts of the event should be improved?',
+    type: 'Open Ended',
+    required: false,
+  },
+  {
+    id: 'fq17',
+    section: 'Open-Ended Feedback',
+    prompt: 'What topics, activities, or event formats would you like to see in the future?',
+    type: 'Open Ended',
+    required: false,
+  },
+  {
+    id: 'fq18',
+    section: 'Open-Ended Feedback',
+    prompt: 'Do you have any additional comments, concerns, or suggestions?',
+    type: 'Open Ended',
+    required: false,
+  },
+];
 
 // ── MOCK DATA ─────────────────────────────────────────────────────────────
 
@@ -343,7 +513,7 @@ export const MY_ATTENDED: (Event & { surveyDone: boolean })[] = [
 export const CERTIFICATE_RECORDS: CertificateRecord[] = [
   { id: 'cert1', eventTitle: 'Leadership Excellence Summit', organizer: 'Office of Student Services', eventDate: 'May 10, 2026', category: 'Leadership', status: 'Released', accentColor: C.maroon, hasCertificate: true },
   { id: 'cert2', eventTitle: 'Online Research Colloquium: AI & Society', organizer: 'CCIS', eventDate: 'July 2, 2026', category: 'Research', status: 'Pending Verification', accentColor: C.slate, hasCertificate: true },
-  { id: 'cert3', eventTitle: 'Community Outreach & Extension Day', organizer: 'Extension Management Office', eventDate: 'July 5, 2026', category: 'Community', status: 'Survey Required', accentColor: C.tangerine, hasCertificate: true },
+  { id: 'cert3', eventTitle: 'Community Outreach & Extension Day', organizer: 'Extension Management Office', eventDate: 'July 5, 2026', category: 'Community', status: 'Feedback Required', accentColor: C.tangerine, hasCertificate: true },
   { id: 'cert4', eventTitle: 'Research Writing & Publication Workshop', organizer: 'Research Management Office', eventDate: 'June 18, 2026', category: 'Research', status: 'Verified Attended', accentColor: C.goldenrod, hasCertificate: true },
   { id: 'cert5', eventTitle: 'Tech Innovation Summit 2026', organizer: 'CCIS', eventDate: 'June 15, 2026', category: 'Technology', status: 'Generating Certificate', accentColor: C.teal, hasCertificate: true },
   { id: 'cert6', eventTitle: 'University Arts Festival', organizer: 'ICTO', eventDate: 'April 10, 2026', category: 'Arts', status: 'Not Eligible', accentColor: C.purple, hasCertificate: true },
