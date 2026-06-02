@@ -26,6 +26,10 @@ export interface Event {
   category: string;
   eventType: EventType;
   exclusivity: string;
+  exclusivityDetails?: {
+    type?: 'open' | 'studentsOnly' | 'facultyOnly' | 'specificOffices';
+    offices?: string[];
+  };
   modality: EventModality;
   location?: string;
   platform?: string;
@@ -307,7 +311,10 @@ export const ALL_EVENTS: Event[] = [
     organizerUnit: 'Office of the Vice President for Student Affairs and Services',
     category: 'Leadership',
     eventType: 'Regular',
-    exclusivity: 'Open to All',
+    exclusivity: 'Students Only',
+    exclusivityDetails: {
+      type: 'studentsOnly',
+    },
     modality: 'Onsite',
     location: 'Student Services Building, Room 204',
     venueLatitude: 14.6509,
@@ -334,7 +341,11 @@ export const ALL_EVENTS: Event[] = [
     organizerUnit: 'Office of the Vice President for Research, Extension and Development',
     category: 'Research',
     eventType: 'Regular',
-    exclusivity: 'Open to All',
+    exclusivity: 'Faculty & Graduate Students',
+    exclusivityDetails: {
+      type: 'specificOffices',
+      offices: ['Faculty', 'Graduate Research Community'],
+    },
     modality: 'Onsite',
     location: 'Graduate School Building, Room 301',
     venueLatitude: 14.6480,
@@ -394,6 +405,7 @@ export const ALL_EVENTS: Event[] = [
     venueLatitude: 14.6525,
     venueLongitude: 121.0485,
     platform: 'Google Meet',
+    platformLink: 'https://meet.google.com/wellness-event-2026',
     startDate: 'June 28, 2026 — 10:00 AM',
     endDate: 'July 2, 2026 — 4:00 PM',
     maxParticipants: 300,
@@ -416,7 +428,10 @@ export const ALL_EVENTS: Event[] = [
     organizerUnit: 'Office of the Vice President for Research, Extension and Development',
     category: 'Research',
     eventType: 'Regular',
-    exclusivity: 'Open to All',
+    exclusivity: 'Faculty Only',
+    exclusivityDetails: {
+      type: 'facultyOnly',
+    },
     modality: 'Online',
     platform: 'Zoom Webinar',
     platformLink: 'https://zoom.us/j/example2',
@@ -442,7 +457,11 @@ export const ALL_EVENTS: Event[] = [
     organizerUnit: 'Office of the Vice President for Research, Extension and Development',
     category: 'Community',
     eventType: 'Regular',
-    exclusivity: 'Open to All',
+    exclusivity: 'By College',
+    exclusivityDetails: {
+      type: 'specificOffices',
+      offices: ['College of Computer and Information Sciences'],
+    },
     modality: 'Onsite',
     location: 'Barangay Sta. Mesa Community Hall',
     venueLatitude: 14.6550,

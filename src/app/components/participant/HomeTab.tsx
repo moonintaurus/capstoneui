@@ -1,6 +1,7 @@
 import { Award, Calendar, MapPin, Globe, Clock, Users, Star, ChevronRight } from 'lucide-react';
 import type { Event } from './data';
 import { C, CATEGORY_COLORS, ALL_EVENTS, PAST_EVENTS } from './data';
+import { ExclusivityBadge } from './ExclusivityBadge';
 
 function ModalityBadge({ modality }: { modality: string }) {
   const map: Record<string, { bg: string; color: string }> = {
@@ -60,6 +61,7 @@ function RecommendedCard({ event, onView }: { event: Event; onView: (e: Event) =
           <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: catColor + '18', color: catColor }}>{event.category}</span>
           <ModalityBadge modality={event.modality} />
           <TypeBadge type={event.eventType} />
+          <ExclusivityBadge exclusivity={event.exclusivity} exclusivityDetails={event.exclusivityDetails} />
         </div>
 
         <div className="space-y-1.5 mb-4">
@@ -110,6 +112,7 @@ function UpcomingCard({ event, onView }: { event: Event; onView: (e: Event) => v
             <div className="flex flex-wrap gap-1.5 mb-2">
               <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: catColor + '18', color: catColor }}>{event.category}</span>
               <ModalityBadge modality={event.modality} />
+              <ExclusivityBadge exclusivity={event.exclusivity} exclusivityDetails={event.exclusivityDetails} />
             </div>
             <h3 className="text-sm font-bold leading-snug" style={{ color: C.text }}>{event.title}</h3>
           </div>

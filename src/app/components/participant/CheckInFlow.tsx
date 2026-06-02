@@ -23,6 +23,8 @@ function CheckInFlowContent({ event, onClose }: CheckInFlowProps) {
   const renderView = () => {
     switch (state.currentStep) {
       // Onsite flow
+      case 'gps':
+        return <OnsiteGeofenceValidationView onNext={handleNext} />;
       case 'location-permission':
         return <OnsiteLocationPermissionView onNext={handleNext} />;
       case 'geofence':

@@ -33,7 +33,7 @@ export interface CheckInState {
   eventId: string;
   eventTitle: string;
   eventModality: 'Onsite' | 'Online' | 'Hybrid';
-  currentStep: 'location-permission' | 'geofence' | 'biometric' | 'confirmation' | 'online-checkin' | 'online-biometric' | 'unlock-link';
+  currentStep: 'gps' | 'location-permission' | 'geofence' | 'biometric' | 'confirmation' | 'online-checkin' | 'online-biometric' | 'unlock-link';
   
   venueLatitude?: number;
   venueLongitude?: number;

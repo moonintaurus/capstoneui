@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import {
   Home, Compass, Star, CalendarCheck, Award, Search, ChevronRight, LogOut, User,
+  Check, Clock, ClipboardList, AlertCircle, X, Info, Download,
 } from 'lucide-react';
-import { C, ALL_EVENTS } from './data';
-import type { Event } from './data';
+import { C, ALL_EVENTS, CATEGORY_COLORS, CERTIFICATE_RECORDS, MY_ATTENDED, MY_ONGOING, MY_UPCOMING } from './data';
+import type { Event, CertificateStatus } from './data';
 import { MyEventsTab } from './MyEventsTab';
 import { EventModal } from './EventModal';
 import { CheckInModal } from './CheckInModal';
+import { ParticipantFeedbackSurvey } from './ParticipantFeedbackSurvey';
 
 type Tab = 'home' | 'explore' | 'recommended' | 'my-events' | 'certificates' | 'profile';
 
@@ -108,44 +110,56 @@ function UserDropdown({ open, onClose, onProfile, onLogOut }: {
 function EventCard({ event, onView }: { event: Event; onView: (event: Event) => void }) {
   const [imgError, setImgError] = useState(false);
   const cover = getEventCover(event);
+  const eventColor = CATEGORY_COLORS[event.category] ?? event.accentColor ?? C.maroon;
+  const modalityColor = event.modality === 'Online' ? C.teal : event.modality === 'Hybrid' ? C.indigo : C.maroon;
+  const typeColor = event.eventType === 'Exclusive' ? C.goldenrod : C.green;
 
   return (
-    <div className="rounded-2xl border overflow-hidden bg-white hover:shadow-lg transition-all" style={{ borderColor: C.border }}>
-      {!imgError ? (
-        <img
-          src={cover}
-          alt={event.title}
-          className="w-full h-36 object-cover"
-          onError={() => setImgError(true)}
-        />
-      ) : (
-        <div className="w-full h-36 flex items-center justify-center"
-          style={{ background: `linear-gradient(135deg, ${event.accentColor || C.maroon} 0%, ${C.maroonDark} 100%)` }}>
-          <p className="text-white text-sm font-bold text-center px-4">{event.title}</p>
+    <div
+      className="rounded-2xl border overflow-hidden bg-white hover:shadow-lg transition-all"
+      style={{ borderColor: eventColor + '45', boxShadow: `inset 0 0 0 1px ${eventColor}10` }}
+    >
+      <div className="h-1.5" style={{ backgroundColor: eventColor }} />
+      <div className="relative">
+        {!imgError ? (
+          <img
+            src={cover}
+            alt={event.title}
+            className="w-full h-36 object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-full h-36 flex items-center justify-center"
+            style={{ background: `linear-gradient(135deg, ${eventColor} 0%, ${eventColor}cc 100%)` }}>
+            <p className="text-white text-sm font-bold text-center px-4">{event.title}</p>
+          </div>
+        )}
+        <div className="absolute left-3 top-3 px-2.5 py-1 rounded-full text-xs font-bold text-white shadow-sm" style={{ backgroundColor: eventColor }}>
+          {event.category}
         </div>
-      )}
+      </div>
 
       <div className="p-4">
         <div className="flex flex-wrap gap-1.5 mb-3">
-          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: C.maroon + '10', color: C.maroon }}>
+          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: eventColor + '18', color: eventColor }}>
             {event.category}
           </span>
-          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: C.teal + '10', color: C.teal }}>
+          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: modalityColor + '12', color: modalityColor }}>
             {event.modality}
           </span>
-          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: C.green + '10', color: C.green }}>
+          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: typeColor + '12', color: typeColor }}>
             {event.eventType}
           </span>
         </div>
 
         <h3 className="font-bold text-sm mb-2" style={{ color: C.text }}>{event.title}</h3>
-        <p className="text-xs mb-1" style={{ color: C.muted }}>{event.startDate}</p>
+        <p className="text-xs mb-1 font-semibold" style={{ color: eventColor }}>{event.startDate}</p>
         <p className="text-xs mb-4" style={{ color: C.muted }}>{event.remainingSlots} seats left</p>
 
         <button
           onClick={() => onView(event)}
           className="w-full py-2.5 rounded-xl text-xs font-bold text-white"
-          style={{ backgroundColor: C.maroon }}
+          style={{ background: `linear-gradient(135deg, ${eventColor} 0%, ${eventColor}cc 100%)` }}
         >
           View Details
         </button>
@@ -208,14 +222,145 @@ function RecommendedEventsTab({ events, onViewEvent }: { events: Event[]; onView
   );
 }
 
+function CertBadge({ status }: { status: CertificateStatus }) {
+  const map: Record<CertificateStatus, { bg: string; color: string; icon: React.ElementType }> = {
+    'Released': { bg: C.green + '15', color: C.green, icon: Check },
+    'Pending Verification': { bg: C.goldenrod + '15', color: C.goldenrod, icon: Clock },
+    'Feedback Required': { bg: C.coral + '15', color: C.coral, icon: ClipboardList },
+    'Template Missing': { bg: '#eee', color: '#777', icon: AlertCircle },
+    'Attendance Not Verified': { bg: C.coral + '12', color: C.coral, icon: AlertCircle },
+    'Verified Attended': { bg: C.teal + '15', color: C.teal, icon: Check },
+    'Generating Certificate': { bg: C.indigo + '12', color: C.indigo, icon: Clock },
+    'Not Eligible': { bg: '#eee', color: '#888', icon: X },
+    'Not Available': { bg: '#eee', color: '#aaa', icon: Info },
+  };
+  const s = map[status];
+  const Icon = s.icon;
+
+  return (
+    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+      style={{ backgroundColor: s.bg, color: s.color }}>
+      <Icon className="w-3 h-3" />
+      {status}
+    </span>
+  );
+}
+
+function CertificateCard({
+  record,
+  feedbackSubmitted,
+  onOpenSurvey,
+}: {
+  record: typeof CERTIFICATE_RECORDS[number];
+  feedbackSubmitted: boolean;
+  onOpenSurvey: (eventTitle: string) => void;
+}) {
+  const isReleased = record.status === 'Released';
+  const isPending = record.status === 'Pending Verification';
+  const isFeedbackRequired = record.status === 'Feedback Required';
+
+  return (
+    <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
+      <div className="h-1.5" style={{ backgroundColor: record.accentColor }} />
+      <div className="p-5">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: record.accentColor + '15' }}>
+            <Award className="w-5 h-5" style={{ color: record.accentColor }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-bold truncate" style={{ color: C.text }}>{record.eventTitle}</h3>
+            <p className="text-xs truncate mt-0.5" style={{ color: C.muted }}>{record.organizer}</p>
+            <p className="text-xs mt-0.5" style={{ color: C.muted }}>{record.eventDate}</p>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <CertBadge status={record.status} />
+        </div>
+
+        {isPending && (
+          <div className="p-3 rounded-xl text-xs leading-relaxed" style={{ backgroundColor: C.goldenrod + '10', color: C.sub }}>
+            You will be notified through email when your certificate has been released.
+          </div>
+        )}
+        {isFeedbackRequired && feedbackSubmitted && (
+          <div className="flex items-center gap-2 py-2.5 px-3 rounded-xl" style={{ backgroundColor: C.green + '10' }}>
+            <Check className="w-4 h-4" style={{ color: C.green }} />
+            <span className="text-xs font-semibold" style={{ color: C.green }}>Feedback submitted. Certificate processing can continue.</span>
+          </div>
+        )}
+        {isFeedbackRequired && !feedbackSubmitted && (
+          <button
+            onClick={() => onOpenSurvey(record.eventTitle)}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold border"
+            style={{ borderColor: C.coral, color: C.coral }}
+          >
+            <ClipboardList className="w-4 h-4" /> Complete Feedback Survey
+          </button>
+        )}
+        {isReleased && (
+          <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-white"
+            style={{ background: `linear-gradient(135deg, ${C.goldenrod} 0%, ${C.mutedGold} 100%)` }}>
+            <Download className="w-4 h-4" /> Download Certificate
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function CertificatesTab() {
+  const [feedbackEvent, setFeedbackEvent] = useState<Event | null>(null);
+  const [submittedFeedbackIds, setSubmittedFeedbackIds] = useState<Set<string>>(
+    () => new Set(MY_ATTENDED.filter(event => event.surveyDone).map(event => event.id)),
+  );
+
+  const participantEvents = [...MY_ATTENDED, ...MY_ONGOING, ...MY_UPCOMING, ...ALL_EVENTS];
+  const findParticipantEventByTitle = (eventTitle: string) =>
+    participantEvents.find(event => event.title === eventTitle || eventTitle.includes(event.title) || event.title.includes(eventTitle));
+
+  const openFeedbackSurvey = (eventTitle: string) => {
+    const matchedEvent = findParticipantEventByTitle(eventTitle);
+    if (matchedEvent) setFeedbackEvent(matchedEvent);
+  };
+
+  const hasSubmittedFeedbackForTitle = (eventTitle: string) => {
+    const matchedEvent = findParticipantEventByTitle(eventTitle);
+    return matchedEvent ? submittedFeedbackIds.has(matchedEvent.id) : false;
+  };
+
+  const handleFeedbackSubmitted = (eventId: string) => {
+    setSubmittedFeedbackIds(prev => new Set([...prev, eventId]));
+  };
+
   return (
     <div>
       <h2 className="font-bold mb-1" style={{ color: C.text, fontSize: '1.25rem' }}>My Certificates</h2>
-      <p className="text-sm mb-6" style={{ color: C.muted }}>View and download your released certificates.</p>
-      <div className="bg-white rounded-2xl border p-6" style={{ borderColor: C.border }}>
-        <p className="text-sm" style={{ color: C.muted }}>No released certificates yet.</p>
+      <p className="text-sm mb-6" style={{ color: C.muted }}>Track certificate status and download released certificates.</p>
+
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {CERTIFICATE_RECORDS.map(record => (
+          <CertificateCard
+            key={record.id}
+            record={record}
+            feedbackSubmitted={hasSubmittedFeedbackForTitle(record.eventTitle)}
+            onOpenSurvey={openFeedbackSurvey}
+          />
+        ))}
       </div>
+
+      <p className="text-xs mt-5 flex items-center gap-1.5" style={{ color: C.muted }}>
+        <Info className="w-3.5 h-3.5" />
+        Certificate statuses are updated after the event organizer uploads the attendance log. You will be notified by email when certificates are released.
+      </p>
+
+      {feedbackEvent && (
+        <ParticipantFeedbackSurvey
+          event={feedbackEvent}
+          onClose={() => setFeedbackEvent(null)}
+          onSubmitted={handleFeedbackSubmitted}
+        />
+      )}
     </div>
   );
 }

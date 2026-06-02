@@ -36,6 +36,17 @@ export function OnsiteBiometricView({ onNext }: { onNext: () => void }) {
     };
   }, [modelsLoaded, startCamera, stopCamera]);
 
+  // Auto-verify face once camera is ready
+  useEffect(() => {
+    const autoVerifyTimer = setTimeout(() => {
+      if (modelsLoaded && faceState.status === 'idle' && !isVerifying) {
+        handleVerifyFace();
+      }
+    }, 1500); // Wait for camera to stabilize
+
+    return () => clearTimeout(autoVerifyTimer);
+  }, [modelsLoaded, faceState.status, isVerifying]);
+
   const handleVerifyFace = async () => {
     if (!modelsLoaded || isVerifying) return;
 
@@ -52,10 +63,8 @@ export function OnsiteBiometricView({ onNext }: { onNext: () => void }) {
           faceDescriptor: result.descriptor,
         });
         recordCheckIn(state.participantName || 'Participant');
-        
-        // Move to confirmation after a brief delay
         setCurrentStep('confirmation');
-        setTimeout(onNext, 1000);
+        onNext();
       } else {
         setBiometricVerification({
           status: 'failed',
@@ -151,7 +160,7 @@ export function OnsiteBiometricView({ onNext }: { onNext: () => void }) {
                 </p>
                 <p className="text-xs" style={{ color: C.sub }}>
                   {isVerified
-                    ? 'Your identity has been verified. Proceeding to check-in confirmation.'
+                    ? 'Your identity has been verified. Showing check-in confirmation.'
                     : faceState.status === 'failed' || lastError
                       ? lastError || 'Face could not be verified. Please try again.'
                       : 'Look directly at the camera and stay still. Your face will be scanned automatically.'}
@@ -229,7 +238,7 @@ export function OnsiteBiometricView({ onNext }: { onNext: () => void }) {
           {isVerified && (
             <div className="text-center py-2">
               <p className="text-xs text-green-600 font-semibold">
-                Proceeding to check-in confirmation...
+                Showing check-in confirmation...
               </p>
             </div>
           )}

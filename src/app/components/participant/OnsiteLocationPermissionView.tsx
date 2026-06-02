@@ -150,7 +150,10 @@ export function OnsiteLocationPermissionView({ onNext }: { onNext: () => void })
           
           {state.locationPermission.status === 'granted' && (
             <button
-              onClick={onNext}
+              onClick={() => {
+                setCurrentStep('geofence');
+                onNext();
+              }}
               className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
               style={{ background: `linear-gradient(135deg, ${C.maroon} 0%, ${C.maroonDark} 100%)` }}
             >

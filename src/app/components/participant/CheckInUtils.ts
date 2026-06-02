@@ -1,6 +1,14 @@
 import type { GpsCoordinates, GeofenceValidationResult } from './CheckInTypes';
 
-const GEOFENCE_RADIUS_METERS = 50;
+export const DEMO_MODE = true;
+export const GEOFENCE_RADIUS_METERS = 50;
+export const DEMO_LOCATION: GpsCoordinates = {
+  latitude: 14.655,
+  longitude: 121.051,
+  accuracy: 10,
+  timestamp: Date.now(),
+};
+
 const EARTH_RADIUS_KM = 6371;
 
 export class GeofenceCalculator {

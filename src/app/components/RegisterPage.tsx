@@ -525,7 +525,7 @@ export function RegisterPage() {
                     helperText="Your role helps SIGLA personalize event access and registration requirements."
                   />
 
-                  {/* Student / Faculty → College + Program */}
+                  {/* Student / Faculty → College + Program (Student only) */}
                   {isStudentOrFaculty && (
                     <>
                       <SearchableSelect
@@ -535,21 +535,21 @@ export function RegisterPage() {
                         onChange={set('college')}
                         options={COLLEGES}
                       />
-                      {form.college && (
+                      {/* Program field: only show for Students */}
+                      {form.role === 'Student' && form.college && (
                         <SearchableSelect
-                          label={form.role === 'Faculty' ? 'Program (optional)' : 'Program'}
+                          label="Program"
                           placeholder="Select your program"
                           value={form.program}
                           onChange={set('program')}
                           options={programOptions}
-                          required={form.role === 'Student'}
-                          helperText={form.role === 'Faculty' ? 'Faculty may optionally specify a home program or department affiliation.' : undefined}
+                          required={true}
                         />
                       )}
                     </>
                   )}
 
-                  {/* University Staff → Office/Department + Unit/Section */}
+                  {/* University Staff → Office/Department only */}
                   {isStaff && (
                     <>
                       <SearchableSelect
@@ -558,15 +558,7 @@ export function RegisterPage() {
                         value={form.office}
                         onChange={set('office')}
                         options={STAFF_OFFICES}
-                      />
-                      <InputField
-                        label="Unit / Section"
-                        icon={User}
-                        placeholder="Select your unit or section"
-                        value={form.unitSection}
-                        onChange={set('unitSection')}
-                        required={false}
-                        hint="e.g. Systems Development Unit, HR Operations Section"
+                        required={true}
                       />
                     </>
                   )}

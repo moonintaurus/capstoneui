@@ -1,10 +1,11 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import {
   X, Award, Calendar, MapPin, Globe, Users, Shield, Clock,
-  Check, Info, Tag, Building2
+  Check, Info, Tag, Building2, Lock
 } from 'lucide-react';
 import type { Event } from './data';
 import { C, CATEGORY_COLORS } from './data';
+import { ExclusivityBadge } from './ExclusivityBadge';
 
 function Badge({ label, bg, color }: { label: string; bg: string; color: string }) {
   return <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: bg, color }}>{label}</span>;
@@ -102,7 +103,32 @@ export function EventModal({
                 <DetailRow icon={Building2} label="Organizer" value={event.organizer} />
                 <DetailRow icon={Tag} label="Category" value={event.category} accent={catColor} />
                 <DetailRow icon={Info} label="Event Type" value={event.eventType} />
-                <DetailRow icon={Shield} label="Exclusivity" value={event.exclusivity} />
+                
+                {/* Enhanced Exclusivity Display */}
+                <div className="flex items-start gap-3 py-3 border-b" style={{ borderColor: 'rgba(128,0,0,0.06)' }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ backgroundColor: C.maroon + '12' }}>
+                    <Shield className="w-4 h-4" style={{ color: C.maroon }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold mb-2" style={{ color: C.muted }}>Exclusivity</p>
+                    <div className="flex items-start gap-2 flex-col">
+                      <ExclusivityBadge exclusivity={event.exclusivity} exclusivityDetails={event.exclusivityDetails} />
+                      {event.exclusivityDetails?.type === 'specificOffices' && event.exclusivityDetails.offices && event.exclusivityDetails.offices.length > 0 && (
+                        <div className="text-xs mt-2 p-2 rounded-lg w-full" style={{ backgroundColor: 'rgba(218, 165, 32, 0.05)', color: C.sub }}>
+                          <p className="font-semibold mb-1" style={{ color: C.goldenrod }}>Restricted to:</p>
+                          <ul className="space-y-0.5">
+                            {event.exclusivityDetails.offices.map((office, idx) => (
+                              <li key={idx} className="flex items-center gap-1">
+                                <span>•</span> <span>{office}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <DetailRow
                   icon={event.modality === 'Online' ? Globe : MapPin}
                   label={event.modality === 'Online' ? 'Platform' : 'Location'}

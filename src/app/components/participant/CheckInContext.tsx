@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import type { CheckInState, CheckInContextType, LocationPermissionState, GeofenceValidationResult, BiometricVerificationState } from './CheckInTypes';
+import { DEMO_MODE } from './CheckInUtils';
 
 const CheckInContext = createContext<CheckInContextType | undefined>(undefined);
 
@@ -7,7 +8,7 @@ const createInitialState = (eventId: string, eventTitle: string, eventModality: 
   eventId,
   eventTitle,
   eventModality,
-  currentStep: eventModality === 'Online' ? 'online-checkin' : 'location-permission',
+  currentStep: eventModality === 'Online' ? 'online-checkin' : DEMO_MODE ? 'gps' : 'location-permission',
   venueLatitude,
   venueLongitude,
   locationPermission: { status: 'idle' },
