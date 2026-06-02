@@ -15,14 +15,7 @@ function ModalityBadge({ modality }: { modality: string }) {
   );
 }
 
-function TypeBadge({ type }: { type: string }) {
-  return (
-    <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
-      style={{ backgroundColor: C.green + '15', color: C.green }}>
-      {type}
-    </span>
-  );
-}
+
 
 function SlotBar({ remaining, max }: { remaining: number; max: number }) {
   const pct = Math.max(0, Math.min(100, ((max - remaining) / max) * 100));
@@ -60,7 +53,6 @@ function RecommendedCard({ event, onView }: { event: Event; onView: (e: Event) =
         <div className="flex flex-wrap gap-1.5 mb-3">
           <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: catColor + '18', color: catColor }}>{event.category}</span>
           <ModalityBadge modality={event.modality} />
-          <TypeBadge type={event.eventType} />
           <ExclusivityBadge exclusivity={event.exclusivity} exclusivityDetails={event.exclusivityDetails} />
         </div>
 
@@ -148,8 +140,7 @@ function UpcomingCard({ event, onView }: { event: Event; onView: (e: Event) => v
 
         <SlotBar remaining={event.remainingSlots} max={event.maxParticipants} />
 
-        <div className="flex items-center justify-between mt-4">
-          <TypeBadge type={event.eventType} />
+        <div className="flex items-center justify-end mt-4">
           <button
             className="flex items-center gap-1 text-xs font-semibold transition-colors"
             style={{ color: C.maroon }}
@@ -170,7 +161,6 @@ export function HomeTab({ onViewEvent, filter }: { onViewEvent: (e: Event) => vo
     if (filter === 'Onsite') return e.modality === 'Onsite';
     if (filter === 'Online') return e.modality === 'Online';
     if (filter === 'Hybrid') return e.modality === 'Hybrid';
-    if (filter === 'Regular') return e.eventType === 'Regular';
     if (filter === 'With Certificate') return e.hasCertificate;
     return true;
   });

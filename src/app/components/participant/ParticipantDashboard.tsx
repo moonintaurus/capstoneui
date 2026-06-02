@@ -14,7 +14,7 @@ import { ParticipantFeedbackSurvey } from './ParticipantFeedbackSurvey';
 type Tab = 'home' | 'explore' | 'recommended' | 'my-events' | 'certificates' | 'profile';
 
 const PARTICIPANT = { name: 'Maria Santos', initials: 'MS', college: 'CCIS', program: 'Computer Science' };
-const FILTER_CHIPS = ['All', 'Onsite', 'Online', 'Hybrid', 'Regular', 'With Certificate'];
+const FILTER_CHIPS = ['All', 'Onsite', 'Online', 'Hybrid', 'With Certificate'];
 
 const NAV = [
   { id: 'home' as Tab, label: 'Home', icon: Home },
@@ -112,7 +112,6 @@ function EventCard({ event, onView }: { event: Event; onView: (event: Event) => 
   const cover = getEventCover(event);
   const eventColor = CATEGORY_COLORS[event.category] ?? event.accentColor ?? C.maroon;
   const modalityColor = event.modality === 'Online' ? C.teal : event.modality === 'Hybrid' ? C.indigo : C.maroon;
-  const typeColor = event.eventType === 'Exclusive' ? C.goldenrod : C.green;
 
   return (
     <div
@@ -146,9 +145,6 @@ function EventCard({ event, onView }: { event: Event; onView: (event: Event) => 
           </span>
           <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: modalityColor + '12', color: modalityColor }}>
             {event.modality}
-          </span>
-          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: typeColor + '12', color: typeColor }}>
-            {event.eventType}
           </span>
         </div>
 
@@ -379,7 +375,6 @@ export function ParticipantDashboard() {
     const matchesFilter =
       activeFilter === 'All' ||
       event.modality === activeFilter ||
-      event.eventType === activeFilter ||
       (activeFilter === 'With Certificate' && event.hasCertificate);
     return matchesSearch && matchesFilter;
   });

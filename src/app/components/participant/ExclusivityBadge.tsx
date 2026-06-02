@@ -43,21 +43,16 @@ export function ExclusivityBadge({
       : `Specific Offices (${exclusivityDetails.offices?.length || 0})`;
     bgColor = C.goldenrod + '15';
     textColor = C.goldenrod;
-  } else if (exclusivity.includes('Student')) {
+  } else if (exclusivity === 'Student' || exclusivity.includes('Student')) {
     icon = Users;
     label = 'Students Only';
     bgColor = C.indigo + '15';
     textColor = C.indigo;
-  } else if (exclusivity.includes('Faculty')) {
+  } else if (exclusivity === 'Faculty' || exclusivity.includes('Faculty')) {
     icon = BookOpen;
     label = 'Faculty Only';
     bgColor = C.slate + '15';
     textColor = C.slate;
-  } else if (exclusivity === 'By College' || exclusivity === 'By Program') {
-    icon = Building2;
-    label = 'Exclusive Event';
-    bgColor = C.goldenrod + '15';
-    textColor = C.goldenrod;
   }
 
   const Icon = icon;

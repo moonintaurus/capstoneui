@@ -45,8 +45,6 @@ const REVIEW_FILTERS = [
   'Rejected',
   'All',
   ...EVENT_CATEGORIES,
-  'Regular',
-  'Schedule-Based',
   'Onsite',
   'Online',
   'Hybrid',
@@ -88,7 +86,6 @@ function filterMatches(event: CmoEvent, filter: string) {
   if (filter === 'Approved') return event.approvalStatus === 'Approved';
   if (filter === 'Rejected') return event.approvalStatus === 'Rejected';
   if (EVENT_CATEGORIES.includes(filter as CmoEvent['category'])) return event.category === filter;
-  if (filter === 'Regular' || filter === 'Schedule-Based') return event.type === filter;
   if (filter === 'Onsite' || filter === 'Online' || filter === 'Hybrid') return event.modality === filter;
   return true;
 }
@@ -96,7 +93,7 @@ function filterMatches(event: CmoEvent, filter: string) {
 function getChecklist(event: CmoEvent) {
   return [
     { label: 'Basic details complete', done: Boolean(event.title && event.tagline && event.description && event.category) },
-    { label: 'Schedule complete', done: Boolean(event.startDate && event.endDate && (event.type === 'Regular' || (event.slots?.length ?? 0) > 0)) },
+    { label: 'Schedule complete', done: Boolean(event.startDate && event.endDate) },
     { label: 'Audience and eligibility defined', done: Boolean(event.targetAudience && event.eligibility) },
     { label: 'Attendance rules configured', done: event.attendanceRules.length > 0 },
     { label: 'Survey configured or marked not required', done: event.surveyStatus === 'Configured' || event.surveyStatus === 'Not Required' },
@@ -273,7 +270,6 @@ function EventDetailModal({
                   <Badge text={event.approvalStatus} style={APPROVAL_STYLE[event.approvalStatus]} />
                   <div className="flex flex-wrap gap-2">
                     <CategoryBadge event={event} />
-                    <Badge text={event.type} style={{ bg: `${C.slate}18`, color: C.slate }} />
                     <Badge text={event.modality} style={{ bg: `${C.teal}15`, color: C.teal }} />
                   </div>
                 </div>
@@ -435,7 +431,6 @@ function EventRow({ event, onSelect }: { event: CmoEvent; onSelect: (event: CmoE
       <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.sub }}>{event.organizer}</td>
       <td className="px-4 py-3.5 text-xs max-w-[160px]"><p className="truncate" style={{ color: C.muted }}>{event.department}</p></td>
       <td className="px-4 py-3.5"><CategoryBadge event={event} /></td>
-      <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.sub }}>{event.type}</td>
       <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.sub }}>{event.modality}</td>
       <td className="px-4 py-3.5 text-xs whitespace-nowrap" style={{ color: C.muted }}>{event.dateSubmitted}</td>
       <td className="px-4 py-3.5"><Badge text={event.approvalStatus} style={APPROVAL_STYLE[event.approvalStatus]} /></td>
@@ -548,7 +543,7 @@ export function EventApprovalsTab(props: SharedEventStateProps) {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: C.cream }}>
-                {['Event', 'Organizer', 'Department / Office', 'Category', 'Type', 'Modality', 'Submitted', 'Status', 'Actions'].map(head => (
+                {['Event', 'Organizer', 'Department / Office', 'Category', 'Modality', 'Submitted', 'Status', 'Actions'].map(head => (
                   <th key={head} className="px-4 py-3 text-left text-xs font-bold whitespace-nowrap" style={{ color: C.muted }}>{head}</th>
                 ))}
               </tr>
@@ -559,7 +554,7 @@ export function EventApprovalsTab(props: SharedEventStateProps) {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-sm" style={{ color: C.muted }}>
+                  <td colSpan={8} className="px-4 py-12 text-center text-sm" style={{ color: C.muted }}>
                     No submitted events match the current search or filter.
                   </td>
                 </tr>

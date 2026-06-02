@@ -79,6 +79,8 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [maxParticipants, setMaxParticipants] = useState('50');
+  const [maxOnsiteParticipants, setMaxOnsiteParticipants] = useState('25');
+  const [maxOnlineParticipants, setMaxOnlineParticipants] = useState('25');
 
   const [certPlaceholders, setCertPlaceholders] = useState<string[]>(['Participant Name', 'Event Title', 'Event Date']);
   const [certValidated, setCertValidated] = useState(false);
@@ -99,7 +101,9 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
       date: startDate,
       endDate,
       location,
-      maxParticipants: Number(maxParticipants),
+      maxParticipants: modality === 'Hybrid'
+        ? Number(maxOnsiteParticipants) + Number(maxOnlineParticipants)
+        : Number(maxParticipants),
       approvalStatus: 'Submitted',
       certTemplateStatus: certValidated ? 'Validated' : 'Not Uploaded',
       csvVerificationStatus: modality === 'Onsite' ? 'Not Required' : 'Not Uploaded',
@@ -148,9 +152,8 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
                 </Select>
                 <Select label="Exclusivity" value={exclusivity} onChange={e => setExclusivity(e.target.value)}>
                   <option>Open to All</option>
-                  <option>By College</option>
-                  <option>By Program</option>
-                  <option>Invite Only</option>
+                  <option>Student</option>
+                  <option>Faculty</option>
                 </Select>
               </div>
               <Textarea label="Requirements" value={requirements} onChange={e => setRequirements(e.target.value)} placeholder="Any prerequisites or materials participants must bring..." rows={2} />
@@ -188,7 +191,40 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
                 <Input label="Start Date & Time" required type="datetime-local" value={startDate} onChange={e => setStartDate(e.target.value)} />
                 <Input label="End Date & Time" required type="datetime-local" value={endDate} onChange={e => setEndDate(e.target.value)} />
               </div>
-              <Input label="Maximum Participants" required type="number" value={maxParticipants} onChange={e => setMaxParticipants(e.target.value)} min="1" />
+              {modality === 'Hybrid' ? (
+                <div className="space-y-3">
+                  <div className="rounded-xl border p-3 flex items-start gap-2" style={{ borderColor: C.goldenrod + '40', backgroundColor: C.goldenrod + '08' }}>
+                    <span className="text-xs leading-relaxed" style={{ color: C.sub }}>
+                      For <strong style={{ color: C.text }}>Hybrid</strong> events, specify the maximum number of participants for each mode separately.
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Max Onsite Participants"
+                      required
+                      type="number"
+                      value={maxOnsiteParticipants}
+                      onChange={e => setMaxOnsiteParticipants(e.target.value)}
+                      min="1"
+                      placeholder="e.g. 50"
+                    />
+                    <Input
+                      label="Max Online Participants"
+                      required
+                      type="number"
+                      value={maxOnlineParticipants}
+                      onChange={e => setMaxOnlineParticipants(e.target.value)}
+                      min="1"
+                      placeholder="e.g. 100"
+                    />
+                  </div>
+                  <p className="text-xs" style={{ color: C.muted }}>
+                    Total capacity: <strong style={{ color: C.text }}>{(Number(maxOnsiteParticipants) || 0) + (Number(maxOnlineParticipants) || 0)} participants</strong>
+                  </p>
+                </div>
+              ) : (
+                <Input label="Maximum Participants" required type="number" value={maxParticipants} onChange={e => setMaxParticipants(e.target.value)} min="1" />
+              )}
               <div className="rounded-xl border p-4 text-xs leading-relaxed" style={{ borderColor: C.border, backgroundColor: '#fff', color: C.sub }}>
                 {modality === 'Onsite' && 'Onsite attendance requires GPS/geofencing and face biometric verification.'}
                 {modality === 'Online' && 'Online attendance requires face biometric verification before unlocking the meeting link, then CSV attendance verification after the event.'}
@@ -251,7 +287,9 @@ export function CreateEventWizard({ onClose, onCreated }: { onClose: () => void;
                       ['Location / Platform', location || '-'],
                       ['Start', startDate || '-'],
                       ['End', endDate || '-'],
-                      ['Max Participants', maxParticipants],
+                      ['Max Participants', modality === 'Hybrid'
+                        ? `${maxOnsiteParticipants} onsite + ${maxOnlineParticipants} online = ${(Number(maxOnsiteParticipants) || 0) + (Number(maxOnlineParticipants) || 0)} total`
+                        : maxParticipants],
                       ['Certificate Template', certValidated ? 'Validated' : 'Not uploaded'],
                       ['Feedback Form', 'Standardized form auto assigned'],
                     ].map(([k, v]) => (

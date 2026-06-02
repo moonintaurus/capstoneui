@@ -22,7 +22,6 @@ import {
   getEventFeedbackSummary,
   type ApprovalStatus,
   type CmoEvent,
-  type EventType,
   type FeedbackSummary,
   type Modality,
 } from './data';
@@ -38,7 +37,6 @@ type ReportFilters = {
   category: string;
   status: string;
   modality: string;
-  eventType: string;
 };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -66,8 +64,7 @@ function filterEvents(events: CmoEvent[], filters: ReportFilters) {
       (filters.department === 'All' || event.department === filters.department) &&
       (filters.category === 'All' || event.category === filters.category) &&
       (filters.status === 'All' || event.approvalStatus === filters.status) &&
-      (filters.modality === 'All' || event.modality === filters.modality) &&
-      (filters.eventType === 'All' || event.type === filters.eventType)
+      (filters.modality === 'All' || event.modality === filters.modality)
     );
   });
 }
@@ -80,14 +77,12 @@ export function SystemReportsTab({ events = MOCK_CMO_EVENTS }: SystemReportsTabP
     category: 'All',
     status: 'All',
     modality: 'All',
-    eventType: 'All',
   });
   const [feedback, setFeedback] = useState('');
 
   const departments = ['All', ...Array.from(new Set(events.map(event => event.department)))];
   const statuses: Array<'All' | ApprovalStatus> = ['All', 'Submitted', 'Pending Review', 'Approved', 'Returned with Comments', 'Rejected', 'Published'];
   const modalities: Array<'All' | Modality> = ['All', 'Onsite', 'Online', 'Hybrid'];
-  const eventTypes: Array<'All' | EventType> = ['All', 'Regular', 'Schedule-Based'];
   const filtered = useMemo(() => filterEvents(events, filters), [events, filters]);
 
   const totalParticipants = filtered.reduce((sum, event) => sum + event.registrationCount, 0);
@@ -155,7 +150,7 @@ export function SystemReportsTab({ events = MOCK_CMO_EVENTS }: SystemReportsTabP
         <p className="text-sm mt-1" style={{ color: C.muted }}>Generate CMO monitoring reports for events, participation, approvals, and certificates.</p>
       </div>
 
-      <div className="bg-white rounded-2xl border p-4 grid sm:grid-cols-2 xl:grid-cols-7 gap-3" style={{ borderColor: C.border }}>
+      <div className="bg-white rounded-2xl border p-4 grid sm:grid-cols-2 xl:grid-cols-6 gap-3" style={{ borderColor: C.border }}>
         <label className="block">
           <span className="block text-xs font-semibold mb-1.5" style={{ color: C.muted }}>Start Date</span>
           <input type="date" value={filters.startDate} onChange={event => setFilters({ ...filters, startDate: event.target.value })} className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none" style={{ borderColor: C.border, color: C.text }} />
@@ -169,7 +164,6 @@ export function SystemReportsTab({ events = MOCK_CMO_EVENTS }: SystemReportsTabP
           { key: 'category' as const, label: 'Category', values: ['All', ...EVENT_CATEGORIES] },
           { key: 'status' as const, label: 'Status', values: statuses },
           { key: 'modality' as const, label: 'Modality', values: modalities },
-          { key: 'eventType' as const, label: 'Event Type', values: eventTypes },
         ].map(field => (
           <label key={field.key} className="block">
             <span className="block text-xs font-semibold mb-1.5" style={{ color: C.muted }}>{field.label}</span>

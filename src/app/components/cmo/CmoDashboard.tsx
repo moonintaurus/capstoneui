@@ -21,14 +21,11 @@ import { C, MOCK_CMO_EVENTS, type CmoEvent } from './data';
 import { CmoOverviewTab } from './OverviewTab';
 import { EventApprovalsTab, PublishedEventsTab } from './EventApprovalsTab';
 import {
-  OngoingEventsTab,
-  PastEventsTab,
-  UpcomingEventsTab,
+  MonitoringContent,
 } from './MonitoringTabs';
 import { SystemReportsTab } from './SystemReportsTab';
 
 type Tab = 'overview' | 'approvals' | 'published' | 'monitoring' | 'reports' | 'profile';
-type MonitoringTab = 'upcoming' | 'ongoing' | 'past';
 
 const CMO_ADMIN = {
   name: 'Atty. Rosario Dela Cruz',
@@ -145,14 +142,6 @@ function UserDropdown({
 }
 
 function EventMonitoringTab({ events }: { events: CmoEvent[] }) {
-  const [activeMonitoringTab, setActiveMonitoringTab] = useState<MonitoringTab>('upcoming');
-
-  const monitoringTabs: { id: MonitoringTab; label: string }[] = [
-    { id: 'upcoming', label: 'Upcoming Events' },
-    { id: 'ongoing', label: 'Ongoing Events' },
-    { id: 'past', label: 'Past Events' },
-  ];
-
   return (
     <div className="space-y-5">
       <div>
@@ -160,32 +149,17 @@ function EventMonitoringTab({ events }: { events: CmoEvent[] }) {
           Monitoring
         </h2>
         <p className="text-sm mt-1" style={{ color: C.muted }}>
-          Monitor upcoming, ongoing, and past web-based event records by department, category, status, and modality.
+          Monitor all event records by department, category, status, and modality.
         </p>
       </div>
 
       <div className="bg-white border rounded-2xl overflow-hidden" style={{ borderColor: C.border }}>
-        <div className="flex gap-1 overflow-x-auto px-4 pt-4 border-b" style={{ borderColor: C.border }}>
-          {monitoringTabs.map(tab => (
-            <button
-              type="button"
-              key={tab.id}
-              onClick={() => setActiveMonitoringTab(tab.id)}
-              className="px-4 py-3 text-sm font-semibold border-b-2 whitespace-nowrap transition-all"
-              style={{
-                borderColor: activeMonitoringTab === tab.id ? C.maroon : 'transparent',
-                color: activeMonitoringTab === tab.id ? C.maroon : C.sub,
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
         <div className="p-4 sm:p-6">
-          {activeMonitoringTab === 'upcoming' && <UpcomingEventsTab events={events} />}
-          {activeMonitoringTab === 'ongoing' && <OngoingEventsTab events={events} />}
-          {activeMonitoringTab === 'past' && <PastEventsTab events={events} />}
+          <MonitoringContent
+            sourceEvents={events}
+            statusFilter={() => true}
+            empty="No events match the current filters."
+          />
         </div>
       </div>
     </div>

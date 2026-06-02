@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Trash2 } from 'lucide-react';
+import { Search, Trash2, Check } from 'lucide-react';
 import { C, MOCK_REGISTRANTS, CERT_STATUS_STYLE, ATT_STATUS_STYLE, MOCK_EVENTS } from './data';
 
 export function RegistrantsTab({ eventId }: { eventId?: string }) {
@@ -8,6 +8,15 @@ export function RegistrantsTab({ eventId }: { eventId?: string }) {
   const [filterEvent, setFilterEvent] = useState('All');
   const [filterReg, setFilterReg] = useState('All');
   const [feedback, setFeedback] = useState('');
+  const [markedAttendance, setMarkedAttendance] = useState<Set<string>>(new Set());
+
+  const toggleMark = (id: string) => {
+    setMarkedAttendance(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const selectedEventTitle = eventId ? MOCK_EVENTS.find(ev => ev.id === eventId)?.title : undefined;
 
@@ -60,7 +69,7 @@ export function RegistrantsTab({ eventId }: { eventId?: string }) {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: C.cream }}>
-                {['Participant Name', 'Email', 'Dept.', 'Program', 'Event', 'Reg. Status', 'Attendance', 'Certificate', ...(eventId ? ['Actions'] : [])].map(h => (
+                {['Participant Name', 'Email', 'Dept.', 'Program', 'Event', 'Reg. Status', 'Attendance', 'Mark Attendance', 'Certificate', ...(eventId ? ['Actions'] : [])].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-bold whitespace-nowrap" style={{ color: C.muted }}>{h}</th>
                 ))}
               </tr>
@@ -82,6 +91,21 @@ export function RegistrantsTab({ eventId }: { eventId?: string }) {
                     </td>
                     <td className="px-4 py-3.5">
                       <span className="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap" style={{ backgroundColor: att.bg, color: att.color }}>{r.attendanceStatus}</span>
+                    </td>
+                    {/* Mark Attendance column */}
+                    <td className="px-4 py-3.5 text-center">
+                      <button
+                        type="button"
+                        onClick={() => toggleMark(r.id)}
+                        className="w-6 h-6 rounded flex items-center justify-center border-2 transition-all duration-200 mx-auto"
+                        style={{
+                          borderColor: markedAttendance.has(r.id) ? '#16a34a' : C.border,
+                          backgroundColor: markedAttendance.has(r.id) ? '#16a34a' : 'white',
+                        }}
+                        title={markedAttendance.has(r.id) ? 'Unmark attendance' : 'Mark attendance'}
+                      >
+                        {markedAttendance.has(r.id) && <Check className="w-3.5 h-3.5 text-white" />}
+                      </button>
                     </td>
                     <td className="px-4 py-3.5">
                       <span className="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap" style={{ backgroundColor: cert.bg, color: cert.color }}>{r.certStatus}</span>
@@ -106,7 +130,7 @@ export function RegistrantsTab({ eventId }: { eventId?: string }) {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={eventId ? 9 : 8} className="px-4 py-10 text-center text-sm" style={{ color: C.muted }}>No registrants match your filters.</td></tr>
+                <tr><td colSpan={eventId ? 10 : 9} className="px-4 py-10 text-center text-sm" style={{ color: C.muted }}>No registrants match your filters.</td></tr>
               )}
             </tbody>
           </table>

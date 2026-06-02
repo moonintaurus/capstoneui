@@ -1,7 +1,7 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import {
   X, Award, Calendar, MapPin, Globe, Users, Shield, Clock,
-  Check, Info, Tag, Building2, Lock
+  Check, Info, Tag, Building2, AlertCircle
 } from 'lucide-react';
 import type { Event } from './data';
 import { C, CATEGORY_COLORS } from './data';
@@ -66,7 +66,6 @@ export function EventModal({
             <div className="flex flex-wrap gap-2 mb-2">
               <Badge label={event.category} bg="rgba(255,255,255,0.2)" color="#fff" />
               <Badge label={event.modality} bg="rgba(255,255,255,0.2)" color="#fff" />
-              <Badge label={event.eventType} bg="rgba(255,255,255,0.2)" color="#fff" />
               {event.exclusivity !== 'Open to All' && <Badge label={event.exclusivity} bg="rgba(255,255,255,0.2)" color="#fff" />}
             </div>
             <h2 className="text-white font-bold leading-tight" style={{ fontSize: '1.25rem', fontFamily: '"Trajan Pro 3", Cambria, serif', textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
@@ -102,7 +101,7 @@ export function EventModal({
               <div>
                 <DetailRow icon={Building2} label="Organizer" value={event.organizer} />
                 <DetailRow icon={Tag} label="Category" value={event.category} accent={catColor} />
-                <DetailRow icon={Info} label="Event Type" value={event.eventType} />
+
                 
                 {/* Enhanced Exclusivity Display */}
                 <div className="flex items-start gap-3 py-3 border-b" style={{ borderColor: 'rgba(128,0,0,0.06)' }}>
@@ -135,9 +134,22 @@ export function EventModal({
                   value={event.modality === 'Online' ? (event.platform ?? '—') : (event.location ?? '—')}
                   accent={event.accentColor}
                 />
-                <DetailRow icon={Calendar} label="Schedule" value={`${event.startDate} → ${event.endDate}`} />
+                <DetailRow
+                  icon={Calendar}
+                  label="Schedule"
+                  value={event.startDate}
+                />
                 <DetailRow icon={Users} label="Capacity" value={`${event.maxParticipants} participants max`} />
                 <DetailRow icon={Users} label="Remaining Seats" value={`${event.remainingSlots} seats left`} accent={event.remainingSlots < 10 ? C.coral : C.green} />
+              </div>
+
+              {/* First-come first-served highlight */}
+              <div className="mt-4 p-3 rounded-xl flex items-start gap-2.5" style={{ backgroundColor: C.maroon + '0d', border: `1.5px solid ${C.maroon}25` }}>
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: C.maroon }} />
+                <p className="text-xs leading-relaxed" style={{ color: C.sub }}>
+                  <span className="font-bold text-sm" style={{ color: C.maroon }}>First-come, first-served.</span>{' '}
+                  No organizer approval required. Registration is confirmed immediately upon submission.
+                </p>
               </div>
 
               {/* Status */}
@@ -159,11 +171,6 @@ export function EventModal({
                   <p className="text-xs" style={{ color: C.indigo }}>Waitlist available if seats fill up</p>
                 </div>
               )}
-              <div className="mt-4 p-3 rounded-xl" style={{ backgroundColor: C.maroon + '06', border: `1px solid ${C.maroon}12` }}>
-                <p className="text-xs" style={{ color: C.sub }}>
-                  <span className="font-semibold" style={{ color: C.maroon }}>First-come, first-served.</span> No organizer approval is required. Registration is confirmed immediately upon submission.
-                </p>
-              </div>
             </div>
 
             {/* Right: description + registration */}

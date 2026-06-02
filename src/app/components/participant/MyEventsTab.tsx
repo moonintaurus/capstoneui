@@ -58,7 +58,7 @@ function UpcomingCard({ event, onCancel }: { event: Event; onCancel: (id: string
 
         <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: 'rgba(128,0,0,0.06)' }}>
           <span className="text-xs" style={{ color: C.muted }}>
-            {event.modality} · {event.eventType}
+            {event.modality}
           </span>
           <button
             onClick={() => onCancel(event.id)}

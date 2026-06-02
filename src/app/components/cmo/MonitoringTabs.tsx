@@ -192,7 +192,6 @@ function EventRecordModal({ event, onClose }: { event: CmoEvent; onClose: () => 
                   <Badge text={event.approvalStatus} bg={APPROVAL_STYLE[event.approvalStatus].bg} color={APPROVAL_STYLE[event.approvalStatus].color} />
                   <div className="flex flex-wrap gap-2">
                     <CategoryBadge event={event} />
-                    <Badge text={event.type} bg={`${C.slate}18`} color={C.slate} />
                     <ModalityChip modality={event.modality} />
                   </div>
                 </div>
@@ -369,7 +368,7 @@ function EventList({ events, empty }: { events: CmoEvent[]; empty: string }) {
   );
 }
 
-function MonitoringContent({
+export function MonitoringContent({
   sourceEvents,
   statusFilter,
   empty,
